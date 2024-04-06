@@ -1,0 +1,3 @@
+[submodule "dexhandv2_binary_msgs"]
+	path = dexhandv2_binary_msgs
+	url = git@github.com:iotdesignshop/dexhandv2_binary_msgs.git
