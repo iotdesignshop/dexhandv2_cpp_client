@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace dexhand_connect {
 
@@ -8,6 +9,16 @@ class DexhandConnect {
 public:
     DexhandConnect();
     ~DexhandConnect();
+
+    struct DexhandUSBDevice {
+        std::string port;
+        std::string manufacturer;
+        std::string product;
+        std::string serial;
+    };
+
+    static std::vector<DexhandUSBDevice> enumerateDevices();
+
     
     bool openSerial(const std::string& port);
     void closeSerial();
