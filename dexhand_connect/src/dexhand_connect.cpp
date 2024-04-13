@@ -56,7 +56,7 @@ std::vector<DexhandConnect::DexhandUSBDevice> DexhandConnect::enumerateDevices()
                     if (DEXHAND_MANUFACTURER.compare(manufacturer) != 0) {
                         continue;
                     }
-                    
+
                     DexhandUSBDevice device;
                     device.manufacturer = manufacturer;
                     device.product = product;
@@ -142,7 +142,7 @@ size_t DexhandConnect::writeSerial(const char* data, size_t size) {
     return write(serialFd, data, size);
 }
 
-size_t DexhandConnect::readSerial(char* data, size_t size) {
+size_t DexhandConnect::readSerial(uint8_t* data, size_t size) {
     if (!isSerialOpen()) {
         return 0;
     }

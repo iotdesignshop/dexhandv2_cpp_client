@@ -26,7 +26,7 @@ public:
 
     size_t writeSerial(const char* data, size_t size);
 
-    size_t readSerial(char* data, size_t size);
+    size_t readSerial(uint8_t* data, size_t size);
 
     size_t readBytesAvailable();
     
