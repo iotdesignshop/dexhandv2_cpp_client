@@ -4,8 +4,14 @@ project(dexhand_connect VERSION 0.1.0 LANGUAGES C CXX)
 include(CTest)
 enable_testing()
 
+find_package(Protobuf REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIRS})
 
-add_library(dexhand_connect STATIC src/dexhand_connect.cpp)
+add_subdirectory(dexhandv2_binary_msgs)
+
+add_library(dexhand_connect STATIC 
+    src/dexhand_connect.cpp)
+target_link_libraries(dexhand_connect dexhandv2_binary_msgs ${Protobuf_LIBRARIES})
 
 target_include_directories(dexhand_connect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
