@@ -17,10 +17,24 @@ struct msgHeader {
     uint8_t msgData;
 };
 
+struct msgTail {
+    uint8_t checksum;
+    uint8_t msgEnd;
+};
+
 static const size_t MESSAGE_HEADER_OVERHEAD = 4;    // Bytes of header/checksum data on messages
+static const size_t MESSAGE_TAIL_SIZE = 2;          // Bytes of checksum/msgEnd data on messages
 
 bool isValidHeader(const msgHeader* header) {
     return (header->msgStart == 0xff && header->msgSize > 0 && header->msgSize < 512 && header->msgId < DexhandMsgID::NUM_MSGS);
+}
+
+uint8_t calculateChecksum(const uint8_t* data, size_t size) {
+    uint8_t checksum = 0;
+    for (size_t i = 0; i < size; i++) {
+        checksum += data[i];
+    }
+    return checksum;
 }
 
 int main(int argc, char** argv){
@@ -44,7 +58,7 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    // Parse command line args
+    // Parse command line args - allows user to override port if multiple devices are found
     CLI::App app{"Dexhand Connect CLI"};
     app.add_option("-p,--port", port, "Serial port to connect to");
     CLI11_PARSE(app, argc, argv);
@@ -79,8 +93,6 @@ int main(int argc, char** argv){
 
             // Do we already have a partial message?
             if (receivedData.size() > 0) {
-                cout << "Partial Message Bytes: " << receivedData.size() << endl;
-            
                 // Add the data to the received data buffer - we can't really know if it's valid yet,
                 // we just know that we got a valid header, and more data afterward.
                 receivedData.insert(receivedData.end(), data, data + bytesRead);
@@ -89,7 +101,6 @@ int main(int argc, char** argv){
                 // Check if we have a valid message start
                 for (size_t i = 0; i < bytesRead-sizeof(msgHeader); i++) {
                     if (isValidHeader(reinterpret_cast<msgHeader*>(data + i))) {
-                        cout << "Valid Header Found" << endl;
                         receivedData.insert(receivedData.end(), data + i, data + bytesRead);
                         break;
                     }
@@ -107,9 +118,17 @@ int main(int argc, char** argv){
             }
             msgHeader* header = reinterpret_cast<msgHeader*>(receivedData.data());
             if (receivedData.size() < MESSAGE_HEADER_OVERHEAD + header->msgSize) {
-                // Incomplete message
-                cout << "Incomplete message Bytes: " << receivedData.size() << " Expected: " << sizeof(msgHeader) + header->msgSize << endl;
+                // Incomplete message - wait for more data
                 break;
+            }
+
+            // Check the checksum
+            msgTail* tail = reinterpret_cast<msgTail*>(receivedData.data() + MESSAGE_HEADER_OVERHEAD + header->msgSize - MESSAGE_TAIL_SIZE);
+            uint8_t checksum = calculateChecksum(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+            if (checksum != tail->checksum || tail->msgEnd != 0x7f) {
+                cerr << "Message Checksum Failed - Discarding" << endl;
+                receivedData.erase(receivedData.begin(), receivedData.begin() + MESSAGE_HEADER_OVERHEAD + header->msgSize);
+                continue;
             }
             
             // Parse the message
@@ -149,9 +168,8 @@ int main(int argc, char** argv){
             }
 
             // Remove the parsed message from the buffer
-            cout << "Removing " << MESSAGE_HEADER_OVERHEAD + header->msgSize << " bytes from buffer" << endl;
             receivedData.erase(receivedData.begin(), receivedData.begin() + MESSAGE_HEADER_OVERHEAD + header->msgSize);
-            cout << "Message Parsed. Bytes Remaining: " << receivedData.size() << endl;
+            
         }
     }
     
