@@ -8,9 +8,22 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <typeindex>
+#include <typeinfo>
 
+#include "dexhand_message.hpp"
 
 namespace dexhand_connect {
+
+
+template<typename T>
+class IDexhandMessageSubscriber {
+    public:
+        virtual ~IDexhandMessageSubscriber() {}
+        virtual void messageRecieved(const T& message) = 0;
+};
+
 
 /// @brief Main interface to the Dexhand Connect library
 class DexhandConnect {
@@ -44,6 +57,17 @@ public:
     /// @brief Updates the connection to the Dexhand device. This should be called periodically
     /// to process incoming messages
     void update();
+
+    template<class T>
+    void subscribe(IDexhandMessageSubscriber<T>* subscriber) {
+        subscribers[typeid(T)].push_back(static_cast<void*>(subscriber));
+    }
+
+    template<class T>
+    void unsubscribe(IDexhandMessageSubscriber<T>* subscriber) {
+        auto& subs = subscribers[typeid(T)];
+        subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
+    }
 
     
 private:
@@ -86,6 +110,18 @@ private:
     // Calculates the checksum of a message
     uint8_t calculateChecksum(const uint8_t* data, size_t size);
 
+    // Message subscribers
+    std::unordered_map<std::type_index, std::vector<void*>> subscribers;
+
+    template<typename T>
+    void notifyMessageSubscribers(const T& message) {
+        auto subs = subscribers.find(typeid(T));
+        if (subs != subscribers.end()) {
+            for (auto sub : subs->second) {
+                static_cast<IDexhandMessageSubscriber<T>*>(sub)->messageRecieved(message);
+            }
+        }
+    }
     
     
 };

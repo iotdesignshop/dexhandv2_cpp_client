@@ -191,8 +191,7 @@ void DexhandConnect::receiveUSBData() {
     if (readBytesAvailable() > 0) {
         uint8_t data[256];
         size_t bytesRead = readSerial(data, 256);
-        cout << "Bytes Read: " << bytesRead << endl;
-
+        
         // Do we already have a partial message?
         if (receivedData.size() > 0) {
             // Add the data to the received data buffer - we can't really know if it's valid yet,
@@ -245,45 +244,35 @@ void DexhandConnect::processMessages() {
     
             cerr << "Message Checksum Failed - Discarding" << endl;
             receivedData.erase(receivedData.begin(), receivedData.begin() + MESSAGE_HEADER_OVERHEAD + header->msgSize);
-             continue;
+            continue;
         }
         
         // Parse the message
-        if (header->msgStart == 0xff && header->msgId == SERVO_FULL_STATUS_MSG)
+        if (header->msgStart == 0xff)
         {
-            // Individual servo status
-            ServoFullStatusMessage statusMsg;
-            statusMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+            switch(header->msgId) {
+                case SERVO_FULL_STATUS_MSG:
+                {
+                    // Individual servo status
+                    ServoFullStatusMessage statusMsg;
+                    statusMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+                    notifyMessageSubscribers(statusMsg);
+                }
+                break;
             
-            cout << "Servo ID: " << static_cast<unsigned int>(statusMsg.getServoID()) << " Message Size:" << static_cast<unsigned int>(header->msgSize) << endl;
-            cout << "\tStatus: " << static_cast<unsigned int>(statusMsg.getStatus()) << endl;
-            cout << "\tPosition: " << statusMsg.getPosition() << endl;
-            cout << "\tSpeed: " << statusMsg.getSpeed() << endl;
-            cout << "\tLoad: " << statusMsg.getLoad() << endl;
-            cout << "\tVoltage: " << static_cast<unsigned int>(statusMsg.getVoltage()) << endl;
-            cout << "\tTemperature: " << static_cast<unsigned int>(statusMsg.getTemperature()) << endl;
-        }
-        else if(header->msgStart == 0xff && header->msgId == SERVO_DYNAMICS_LIST_MSG)
-        {
-            // Servo dynamics
-            ServoDynamicsMessage dynamicsMsg;
-            dynamicsMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
-
-            cout << "Servo Status List Message Size:" << static_cast<unsigned int>(header->msgSize-MESSAGE_TAIL_SIZE) << endl;
-            
-            cout << "Servo\tStatus\tPos\tSpd\tLoad\n";
-            cout << "------------------------------------\n";
-            for (int i = 0; i < dynamicsMsg.getNumServos(); i++)
-            {
-                const ServoDynamicsMessage::ServoStatus& statusMsg = dynamicsMsg.getServoStatus(i);
-                cout << static_cast<unsigned int>(statusMsg.getServoID()) << "\t";
-                cout << static_cast<unsigned int>(statusMsg.getStatus()) << "\t";
-                cout << statusMsg.getPosition() << "\t" << statusMsg.getSpeed() << "\t" << statusMsg.getLoad() << endl;
-             }
-        }
-        else 
-        {
-            cout << "Unknown message Type: " << static_cast<unsigned int>(header->msgId) << endl;
+                case SERVO_DYNAMICS_LIST_MSG:
+                {
+                    // Servo dynamics
+                    ServoDynamicsMessage dynamicsMsg;
+                    dynamicsMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+                    notifyMessageSubscribers(dynamicsMsg);
+                }
+                break;
+        
+                default:
+                    cerr << "Unknown message Type: " << static_cast<unsigned int>(header->msgId) << endl;
+                    break;
+            }
         }
 
         // Remove the parsed message from the buffer

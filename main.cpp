@@ -8,6 +8,40 @@ using namespace std;
 
 
 
+class FullServoStatusSubscriber : public IDexhandMessageSubscriber<ServoFullStatusMessage> {
+    public:
+        void messageRecieved(const ServoFullStatusMessage& message) override {
+            cout << "Full Status for Servo ID: " << (int)message.getServoID() << endl;
+            cout << "--------------------------------" << endl;
+            cout << "Status: " << (int)message.getStatus() << endl;
+            cout << "Position: " << message.getPosition() << endl;
+            cout << "Speed: " << message.getSpeed() << endl;
+            cout << "Load: " << message.getLoad() << endl;
+            cout << "Voltage: " << (int)message.getVoltage() << endl;
+            cout << "Temperature: " << (int)message.getTemperature() << endl;
+            cout << "--------------------------------" << endl << endl;
+        }
+};
+
+class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage> {
+    public:
+        void messageRecieved(const ServoDynamicsMessage& message) override {
+            cout << "Dynamics message received" << endl;
+            cout << "Num servos: " << message.getNumServos() << endl;
+            cout << "ID:\tStatus\tPos\tSpd\tLoad" << endl;
+            cout << "------------------------------------" << endl;
+            for (size_t i = 0; i < message.getNumServos(); i++){
+                const ServoDynamicsMessage::ServoStatus& status = message.getServoStatus(i);
+                cout << (int)status.getServoID() << "\t";
+                cout << (int)status.getStatus() << "\t";
+                cout << status.getPosition() << "\t";
+                cout << status.getSpeed() << "\t";
+                cout << status.getLoad() << endl;
+            }
+            cout << "------------------------------------" << endl << endl;
+        }
+};
+
 
 int main(int argc, char** argv){
 
@@ -50,6 +84,13 @@ int main(int argc, char** argv){
         cerr << "Failed to connect to " << port << endl;
         return 1;
     }
+
+    // Subscribe to messages
+    FullServoStatusSubscriber fullStatusSubscriber;
+    hand.subscribe(&fullStatusSubscriber);
+
+    DynamicsSubscriber dynamicsSubscriber;
+    hand.subscribe(&dynamicsSubscriber);
 
     while(true) {
         hand.update();
