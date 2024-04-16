@@ -13,10 +13,12 @@
 #include <typeinfo>
 
 #include "dexhand_message.hpp"
+#include "dexhand_command.hpp"
 
 namespace dexhand_connect {
 
-
+/// @brief  Interface for objects that wish to receive messages from the Dexhand device
+/// @tparam T Message type to subscribe to
 template<typename T>
 class IDexhandMessageSubscriber {
     public:
@@ -58,22 +60,33 @@ public:
     /// to process incoming messages
     void update();
 
+    /// @brief Subscribe to messages posted by the Dexhand device
+    /// @tparam T Type of message to subscribe to
+    /// @see dexhand_message.hpp for message types
+    /// @param subscriber Object wishing to receive the messages
     template<class T>
     void subscribe(IDexhandMessageSubscriber<T>* subscriber) {
         subscribers[typeid(T)].push_back(static_cast<void*>(subscriber));
     }
 
+    /// @brief Unsubscribe from messages posted by the Dexhand device
+    /// @tparam T Type of message to unsubscribe from
+    /// @see dexhand_message.hpp for message types
+    /// @param subscriber Object wishing to stop receiving the messages
     template<class T>
     void unsubscribe(IDexhandMessageSubscriber<T>* subscriber) {
         auto& subs = subscribers[typeid(T)];
         subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
     }
 
+    /// @brief Sends a command to the Dexhand device
+    bool sendCommand(const DexhandCommand& command);
+
     
 private:
     int serialFd;   // File descriptor for serial port
 
-    size_t writeSerial(const char* data, size_t size);
+    size_t writeSerial(const uint8_t* data, size_t size);
     size_t readSerial(uint8_t* data, size_t size);
     size_t readBytesAvailable();
 
@@ -113,6 +126,7 @@ private:
     // Message subscribers
     std::unordered_map<std::type_index, std::vector<void*>> subscribers;
 
+    // Notifies subscribers of a message
     template<typename T>
     void notifyMessageSubscribers(const T& message) {
         auto subs = subscribers.find(typeid(T));
@@ -122,7 +136,6 @@ private:
             }
         }
     }
-    
     
 };
 

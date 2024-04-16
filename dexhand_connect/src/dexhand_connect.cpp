@@ -148,11 +148,17 @@ void DexhandConnect::closeSerial() {
     }
 }
 
-size_t DexhandConnect::writeSerial(const char* data, size_t size) {
+size_t DexhandConnect::writeSerial(const uint8_t* data, size_t size) {
     if (!isSerialOpen()) {
         return 0;
     }
-    return write(serialFd, data, size);
+
+    // How much data is available in output stream?
+    size_t result = write(serialFd, data, size);
+    //tcdrain(serialFd);  // Flush
+
+    return result;
+
 }
 
 size_t DexhandConnect::readSerial(uint8_t* data, size_t size) {
@@ -211,8 +217,19 @@ void DexhandConnect::receiveUSBData() {
 
 }
 
-void DexhandConnect::processMessages() {
+// Used for checking endianness on fields that are not protobuf generated 
+bool isLittleEndian() {
+    union {
+        uint32_t i;
+        char c[4];
+    } bint = {0x01020304};
 
+    return bint.c[0] == 4;  // Little endian if true
+}
+
+
+void DexhandConnect::processMessages() {
+    
     // Parse any complete messages
     while(receivedData.size() > 0)
     {  
@@ -221,6 +238,8 @@ void DexhandConnect::processMessages() {
             // Not enough data to parse
             break;
         }
+
+        assert(isLittleEndian() && "This code will need to be updated for endianness");
         msgHeader* header = reinterpret_cast<msgHeader*>(receivedData.data());
         if (receivedData.size() < MESSAGE_HEADER_OVERHEAD + header->msgSize) {
             // Incomplete message - wait for more data
@@ -291,5 +310,50 @@ uint8_t DexhandConnect::calculateChecksum(const uint8_t* data, size_t size) {
     return checksum;
 }
 
+
+bool DexhandConnect::sendCommand(const DexhandCommand& command) {
+    
+    if (!isSerialOpen()) {
+        return false;
+    }
+
+    // Serialize the command
+    string data = command.serialize();
+
+    // Create the message header - it is: 0xff, msgId, msgSize
+    string headerData;
+    headerData.push_back(0xff);
+    headerData.push_back(static_cast<uint8_t>(command.getMessageID()));
+    
+    assert(isLittleEndian() && "This code will need to be updated for endianness");
+    uint16_t msgSize = data.size()+MESSAGE_TAIL_SIZE;
+    headerData.push_back(msgSize & 0xff);
+    headerData.push_back((msgSize >> 8) & 0xff);
+
+    
+    // Calculate the checksum
+    uint8_t checksum = calculateChecksum(reinterpret_cast<const uint8_t*>(data.c_str()), data.size());
+
+    // Create the message tail - it is checksum, 0x7f
+    string tailData;
+    tailData.push_back(checksum);
+    tailData.push_back(0x7f);
+
+    // Compose the mesage
+    string message = headerData + data + tailData;
+
+    if (message.size() > MAX_MESSAGE_SIZE) {
+        cerr << "Command too large to send" << endl;
+        return false;
+    }
+
+    // Send the command
+    if (writeSerial(reinterpret_cast<const uint8_t*>(message.c_str()), message.size()) != message.size()) {
+        cerr << "Error sending command" << endl;
+        return false;
+    }
+    
+    return true;
+}
 
 } // namespace dexhand_connect

@@ -1,7 +1,10 @@
 #include <iostream>
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 #include "dexhand_connect.hpp"
 #include "CLI11.hpp"
+
 
 using namespace dexhand_connect;
 using namespace std;
@@ -92,9 +95,29 @@ int main(int argc, char** argv){
     DynamicsSubscriber dynamicsSubscriber;
     hand.subscribe(&dynamicsSubscriber);
 
+    #define MIN_POS 400
+    #define MAX_POS 1300
+    #define SERVO_MIN 111
+    #define SERVO_MAX 114
+    uint16_t testpos = 400;
+
     while(true) {
         hand.update();
-        usleep(1000);
+        
+        // Send a command to set the position of a servo
+        SetServoPositionsCommand cmd;
+        for (uint8_t i = SERVO_MIN; i <= SERVO_MAX; i++){
+            cmd.setServoPosition(i, testpos);
+        }
+        hand.sendCommand(cmd);
+        testpos += 20;
+        if (testpos > MAX_POS){
+            testpos = MIN_POS;
+        }
+
+        // Don't hammer the device
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));     //50Hz
+
     }
     
 }
