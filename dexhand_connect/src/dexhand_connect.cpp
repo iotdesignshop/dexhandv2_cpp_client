@@ -13,7 +13,7 @@
 
 
 #include "dexhand_connect.hpp"
-
+#include "dexhand_message.hpp"
 
     
 
@@ -125,6 +125,10 @@ bool DexhandConnect::openSerial(const string& port) {
     // Disable software flow control
     options.c_iflag &= ~(IXON | IXOFF | IXANY);
 
+    // Prevent CR to LF conversion
+    options.c_iflag &= ~(ICRNL | INLCR);
+    options.c_oflag &= ~(ONLCR | OCRNL);
+
     // Raw input
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 
@@ -228,41 +232,54 @@ void DexhandConnect::processMessages() {
         msgTail* tail = reinterpret_cast<msgTail*>(receivedData.data() + MESSAGE_HEADER_OVERHEAD + header->msgSize - MESSAGE_TAIL_SIZE);
         uint8_t checksum = calculateChecksum(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
         if (checksum != tail->checksum || tail->msgEnd != 0x7f) {
+
+                cout << "Message Size: " << static_cast<unsigned int>(header->msgSize) << endl;
+                cout << "Checksum: " << static_cast<unsigned int>(checksum) << endl;
+                cout << "Tail Checksum: " << static_cast<unsigned int>(tail->checksum) << endl;
+                cout << "Tail End: " << static_cast<unsigned int>(tail->msgEnd) << endl;
+
+                for (int i = 0; i < header->msgSize; i++)
+                {
+                    cout << "Data[" << i << "]: " << static_cast<unsigned int>(*(&header->msgData+i)) << endl;
+                }    
+    
             cerr << "Message Checksum Failed - Discarding" << endl;
             receivedData.erase(receivedData.begin(), receivedData.begin() + MESSAGE_HEADER_OVERHEAD + header->msgSize);
-            continue;
+             continue;
         }
         
         // Parse the message
-        if (header->msgStart == 0xff && header->msgId == 0x01)
+        if (header->msgStart == 0xff && header->msgId == SERVO_FULL_STATUS_MSG)
         {
             // Individual servo status
-            dexhand::ServoStatus statusMsg;
-            statusMsg.ParseFromArray(&header->msgData, header->msgSize);
-
-            cout << "Servo ID: " << statusMsg.servoid() << " Message Size:" << static_cast<unsigned int>(header->msgSize) << endl;
-            cout << "\tStatus: " << statusMsg.status() << endl;
-            cout << "\tPosition: " << statusMsg.position() << endl;
-            cout << "\tSpeed: " << statusMsg.speed() << endl;
-            cout << "\tLoad: " << statusMsg.load() << endl;
-            cout << "\tVoltage: " << statusMsg.voltage() << endl;
-            cout << "\tTemperature: " << statusMsg.temperature() << endl;
-        }
-        else if(header->msgStart == 0xff && header->msgId == 0x02)
-        {
-            // Servo status list
-            dexhand::ServoStatusList statusListMsg;
-            statusListMsg.ParseFromArray(&header->msgData, header->msgSize);
-
-            cout << "Servo Status List Message Size:" << static_cast<unsigned int>(header->msgSize) << endl;
+            ServoFullStatusMessage statusMsg;
+            statusMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
             
-            cout << "Servo\tStatus\tPos\tLoad\n";
-            cout << "--------------------------------\n";
-            for (int i = 0; i < statusListMsg.servos_size(); i++)
+            cout << "Servo ID: " << static_cast<unsigned int>(statusMsg.getServoID()) << " Message Size:" << static_cast<unsigned int>(header->msgSize) << endl;
+            cout << "\tStatus: " << static_cast<unsigned int>(statusMsg.getStatus()) << endl;
+            cout << "\tPosition: " << statusMsg.getPosition() << endl;
+            cout << "\tSpeed: " << statusMsg.getSpeed() << endl;
+            cout << "\tLoad: " << statusMsg.getLoad() << endl;
+            cout << "\tVoltage: " << static_cast<unsigned int>(statusMsg.getVoltage()) << endl;
+            cout << "\tTemperature: " << static_cast<unsigned int>(statusMsg.getTemperature()) << endl;
+        }
+        else if(header->msgStart == 0xff && header->msgId == SERVO_DYNAMICS_LIST_MSG)
+        {
+            // Servo dynamics
+            ServoDynamicsMessage dynamicsMsg;
+            dynamicsMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+
+            cout << "Servo Status List Message Size:" << static_cast<unsigned int>(header->msgSize-MESSAGE_TAIL_SIZE) << endl;
+            
+            cout << "Servo\tStatus\tPos\tSpd\tLoad\n";
+            cout << "------------------------------------\n";
+            for (int i = 0; i < dynamicsMsg.getNumServos(); i++)
             {
-                const dexhand::ServoStatus& statusMsg = statusListMsg.servos(i);
-                cout << statusMsg.servoid() << "\t" << statusMsg.status() << "\t" << statusMsg.position() << "\t" << statusMsg.load() << endl;
-            }
+                const ServoDynamicsMessage::ServoStatus& statusMsg = dynamicsMsg.getServoStatus(i);
+                cout << static_cast<unsigned int>(statusMsg.getServoID()) << "\t";
+                cout << static_cast<unsigned int>(statusMsg.getStatus()) << "\t";
+                cout << statusMsg.getPosition() << "\t" << statusMsg.getSpeed() << "\t" << statusMsg.getLoad() << endl;
+             }
         }
         else 
         {

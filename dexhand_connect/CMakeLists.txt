@@ -10,7 +10,8 @@ include_directories(${Protobuf_INCLUDE_DIRS})
 add_subdirectory(dexhandv2_binary_msgs)
 
 add_library(dexhand_connect STATIC 
-    src/dexhand_connect.cpp)
+    src/dexhand_connect.cpp
+    src/dexhand_message.cpp)
 target_link_libraries(dexhand_connect dexhandv2_binary_msgs ${Protobuf_LIBRARIES})
 
 target_include_directories(dexhand_connect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
