@@ -45,6 +45,28 @@ class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage
         }
 };
 
+class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessage> {
+    public:
+        void messageRecieved(const ServoVarsListMessage& message) override {
+            cout << "Servo Vars message received" << endl;
+            cout << "Num servos: " << message.getNumServos() << endl;
+            cout << "ID\tHWMin\tHWMax\tSWMin\tSWMax\tHome\tMaxLoad\tMaxTemp" << endl;
+            cout << "------------------------------------------------------------------" << endl;
+            for (size_t i = 0; i < message.getNumServos(); i++){
+                const ServoVarsListMessage::ServoVars& vars = message.getServoVars(i);
+                cout << (int)vars.getServoID() << "\t";
+                cout << vars.getHWMinPosition() << "\t";
+                cout << vars.getHWMaxPosition() << "\t";
+                cout << vars.getSWMinPosition() << "\t";
+                cout << vars.getSWMaxPosition() << "\t";
+                cout << vars.getHomePosition() << "\t";
+                cout << (int)vars.getMaxLoadPct() << "\t";
+                cout << (int)vars.getMaxTemp() << endl;
+            }
+            cout << "------------------------------------" << endl << endl;
+        }
+};
+
 
 int main(int argc, char** argv){
 
@@ -94,6 +116,9 @@ int main(int argc, char** argv){
 
     DynamicsSubscriber dynamicsSubscriber;
     hand.subscribe(&dynamicsSubscriber);
+
+    ServoVarsSubscriber varsSubscriber;
+    hand.subscribe(&varsSubscriber);
 
     #define MIN_POS 400
     #define MAX_POS 1300

@@ -195,8 +195,9 @@ void DexhandConnect::receiveUSBData() {
 
     // Check for incoming data
     if (readBytesAvailable() > 0) {
-        uint8_t data[256];
-        size_t bytesRead = readSerial(data, 256);
+
+        uint8_t data[MAX_MESSAGE_SIZE];
+        size_t bytesRead = readSerial(data, MAX_MESSAGE_SIZE);
         
         // Do we already have a partial message?
         if (receivedData.size() > 0) {
@@ -251,14 +252,14 @@ void DexhandConnect::processMessages() {
         uint8_t checksum = calculateChecksum(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
         if (checksum != tail->checksum || tail->msgEnd != 0x7f) {
 
-                cout << "Message Size: " << static_cast<unsigned int>(header->msgSize) << endl;
-                cout << "Checksum: " << static_cast<unsigned int>(checksum) << endl;
-                cout << "Tail Checksum: " << static_cast<unsigned int>(tail->checksum) << endl;
-                cout << "Tail End: " << static_cast<unsigned int>(tail->msgEnd) << endl;
+                cerr << "Message Size: " << static_cast<unsigned int>(header->msgSize) << endl;
+                cerr << "Checksum: " << static_cast<unsigned int>(checksum) << endl;
+                cerr << "Tail Checksum: " << static_cast<unsigned int>(tail->checksum) << endl;
+                cerr << "Tail End: " << static_cast<unsigned int>(tail->msgEnd) << endl;
 
                 for (int i = 0; i < header->msgSize; i++)
                 {
-                    cout << "Data[" << i << "]: " << static_cast<unsigned int>(*(&header->msgData+i)) << endl;
+                    cerr << "Data[" << i << "]: " << static_cast<unsigned int>(*(&header->msgData+i)) << endl;
                 }    
     
             cerr << "Message Checksum Failed - Discarding" << endl;
@@ -285,6 +286,15 @@ void DexhandConnect::processMessages() {
                     ServoDynamicsMessage dynamicsMsg;
                     dynamicsMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
                     notifyMessageSubscribers(dynamicsMsg);
+                }
+                break;
+
+                case SERVO_VARS_LIST_MSG:
+                {
+                    // Servo variables
+                    ServoVarsListMessage varsMsg;
+                    varsMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+                    notifyMessageSubscribers(varsMsg);
                 }
                 break;
         
