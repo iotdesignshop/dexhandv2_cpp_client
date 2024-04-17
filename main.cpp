@@ -126,6 +126,20 @@ int main(int argc, char** argv){
     #define SERVO_MAX 114
     uint16_t testpos = 400;
 
+    hand.update();
+
+    // Tuning parameters
+    /*SetServoVarsCommand varsCmd;
+    varsCmd.setID(114);
+    varsCmd.setHWMaxPosition(1600);
+    varsCmd.setMaxLoadPct(50);
+    hand.sendCommand(varsCmd);
+    hand.update();*/
+
+    
+
+
+    
     while(true) {
         hand.update();
         

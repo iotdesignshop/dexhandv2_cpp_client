@@ -15,4 +15,10 @@ namespace dexhand_connect {
         return out;
     }
 
+    std::string SetServoVarsCommand::serialize() const {
+        std::string out;
+        msg.SerializeToString(&out);
+        return out;
+    }
+
 } // namespace dexhand_connect
