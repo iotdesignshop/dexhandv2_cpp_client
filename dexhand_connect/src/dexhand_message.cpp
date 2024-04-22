@@ -32,5 +32,12 @@ namespace dexhand_connect {
         }
     }
 
+    void FirmwareVersionMessage::parseMessage(const uint8_t* data, size_t size) {
+        if (!msg.ParseFromArray(data, size)) {
+            // Failed to parse message - this is unusual
+            cerr << "Failed to parse FirmwareVersionMessage" << endl;
+        }
+    }
+
 
 } // namespace dexhand_connect

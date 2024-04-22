@@ -297,6 +297,14 @@ void DexhandConnect::processMessages() {
                     notifyMessageSubscribers(varsMsg);
                 }
                 break;
+
+                case FIRMWARE_VERSION_MSG:
+                {
+                    // Firmware version
+                    FirmwareVersionMessage versionMsg;
+                    versionMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
+                    notifyMessageSubscribers(versionMsg);
+                }
         
                 default:
                     cerr << "Unknown message Type: " << static_cast<unsigned int>(header->msgId) << endl;

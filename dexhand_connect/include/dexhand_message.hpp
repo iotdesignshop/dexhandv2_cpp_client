@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <string>
 #include <cstddef>
 #include <cstdint>
 #include "dexhand_msg_types.hpp"
@@ -106,6 +107,21 @@ class ServoVarsListMessage : public DexhandMessage {
         
     private:
         dexhand::ServoVarsList msg;
+};
+
+class FirmwareVersionMessage : public DexhandMessage {
+    public:
+        FirmwareVersionMessage() : DexhandMessage(dexhand::FIRMWARE_VERSION_MSG) {}
+        ~FirmwareVersionMessage() override {}
+
+        void parseMessage(const uint8_t* data, size_t size) override;
+
+        uint8_t getMajorVersion() const { return msg.major(); }
+        uint8_t getMinorVersion() const { return msg.minor(); }
+        const std::string getVersionName() const { return msg.name(); }
+        
+    private:
+        dexhand::FirmwareVersion msg;
 };
 
 

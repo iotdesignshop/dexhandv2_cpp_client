@@ -67,6 +67,14 @@ class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessag
         }
 };
 
+class FirmwareVersionSubscriber : public IDexhandMessageSubscriber<FirmwareVersionMessage> {
+    public:
+        void messageRecieved(const FirmwareVersionMessage& message) override {
+            cout << "Dexhand Firmware: " << message.getVersionName() << endl;
+            cout << "Firmware version: " << (int)message.getMajorVersion() << "." << (int)message.getMinorVersion() << endl;
+        }
+};
+
 
 int main(int argc, char** argv){
 
@@ -119,6 +127,9 @@ int main(int argc, char** argv){
 
     ServoVarsSubscriber varsSubscriber;
     hand.subscribe(&varsSubscriber);
+
+    FirmwareVersionSubscriber firmwareSubscriber;
+    hand.subscribe(&firmwareSubscriber);
 
     #define MIN_POS 400
     #define MAX_POS 1300
