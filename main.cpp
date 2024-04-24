@@ -13,7 +13,7 @@ using namespace std;
 
 class FullServoStatusSubscriber : public IDexhandMessageSubscriber<ServoFullStatusMessage> {
     public:
-        void messageRecieved(const ServoFullStatusMessage& message) override {
+        void messageReceived(const ServoFullStatusMessage& message) override {
             cout << "Full Status for Servo ID: " << (int)message.getServoID() << endl;
             cout << "--------------------------------" << endl;
             cout << "Status: " << (int)message.getStatus() << endl;
@@ -28,7 +28,7 @@ class FullServoStatusSubscriber : public IDexhandMessageSubscriber<ServoFullStat
 
 class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage> {
     public:
-        void messageRecieved(const ServoDynamicsMessage& message) override {
+        void messageReceived(const ServoDynamicsMessage& message) override {
             cout << "Dynamics message received" << endl;
             cout << "Num servos: " << message.getNumServos() << endl;
             cout << "ID:\tStatus\tPos\tSpd\tLoad" << endl;
@@ -47,7 +47,7 @@ class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage
 
 class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessage> {
     public:
-        void messageRecieved(const ServoVarsListMessage& message) override {
+        void messageReceived(const ServoVarsListMessage& message) override {
             cout << "Servo Vars message received" << endl;
             cout << "Num servos: " << message.getNumServos() << endl;
             cout << "ID\tHWMin\tHWMax\tSWMin\tSWMax\tHome\tMaxLoad\tMaxTemp" << endl;
@@ -69,7 +69,7 @@ class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessag
 
 class FirmwareVersionSubscriber : public IDexhandMessageSubscriber<FirmwareVersionMessage> {
     public:
-        void messageRecieved(const FirmwareVersionMessage& message) override {
+        void messageReceived(const FirmwareVersionMessage& message) override {
             cout << "Dexhand Firmware: " << message.getVersionName() << endl;
             cout << "Firmware version: " << (int)message.getMajorVersion() << "." << (int)message.getMinorVersion() << endl;
         }
@@ -79,10 +79,11 @@ class FirmwareVersionSubscriber : public IDexhandMessageSubscriber<FirmwareVersi
 int main(int argc, char** argv){
 
 
+    DexhandConnect hand;
     string port;
 
     // Default is to look for first Dexhand device
-    vector<DexhandConnect::DexhandUSBDevice> devices = DexhandConnect::enumerateDevices();
+    vector<DexhandConnect::DexhandUSBDevice> devices = hand.enumerateDevices();
     if (devices.size() > 0){
         cout << "Found " << devices.size() << " Dexhand devices" << endl;
         cout << "Manufacturer: " << devices[0].manufacturer << endl;
@@ -109,7 +110,6 @@ int main(int argc, char** argv){
     }
 
     // Attempt serial connection
-    DexhandConnect hand;
     if (hand.openSerial(port)){
         cout << "Connected to " << port << endl;
     }

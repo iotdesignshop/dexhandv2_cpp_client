@@ -7,13 +7,21 @@ enable_testing()
 find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 
+# Dependencies
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBUDEV REQUIRED libudev)
+
+# Include directories
+include_directories(${LIBUDEV_INCLUDE_DIRS})
+
+
 add_subdirectory(dexhandv2_binary_msgs)
 
 add_library(dexhand_connect STATIC 
     src/dexhand_connect.cpp
     src/dexhand_message.cpp
     src/dexhand_command.cpp)
-target_link_libraries(dexhand_connect dexhandv2_binary_msgs ${Protobuf_LIBRARIES})
+target_link_libraries(dexhand_connect dexhandv2_binary_msgs ${Protobuf_LIBRARIES} ${LIBUDEV_LIBRARIES})
 
 target_include_directories(dexhand_connect PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

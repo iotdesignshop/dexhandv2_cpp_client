@@ -305,6 +305,7 @@ void DexhandConnect::processMessages() {
                     versionMsg.parseMessage(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);
                     notifyMessageSubscribers(versionMsg);
                 }
+                break;
         
                 default:
                     cerr << "Unknown message Type: " << static_cast<unsigned int>(header->msgId) << endl;

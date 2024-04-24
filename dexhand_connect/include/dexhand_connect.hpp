@@ -23,7 +23,7 @@ template<typename T>
 class IDexhandMessageSubscriber {
     public:
         virtual ~IDexhandMessageSubscriber() {}
-        virtual void messageRecieved(const T& message) = 0;
+        virtual void messageReceived(const T& message) = 0;
 };
 
 
@@ -43,7 +43,7 @@ public:
 
     /// @brief Scans for connected Dexhand devices via USB and returns a list of devices
     /// @return List of connected Dexhand devices
-    static std::vector<DexhandUSBDevice> enumerateDevices();
+    std::vector<DexhandUSBDevice> enumerateDevices();
 
     /// @brief Opens a serial connection to a Dexhand device
     /// @param port Serial port to connect to
@@ -132,7 +132,7 @@ private:
         auto subs = subscribers.find(typeid(T));
         if (subs != subscribers.end()) {
             for (auto sub : subs->second) {
-                static_cast<IDexhandMessageSubscriber<T>*>(sub)->messageRecieved(message);
+                static_cast<IDexhandMessageSubscriber<T>*>(sub)->messageReceived(message);
             }
         }
     }
