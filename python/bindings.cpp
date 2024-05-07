@@ -174,6 +174,7 @@ public:
 PYBIND11_MODULE(dexhand_connect_py, m) {
     m.doc() = "Dexhand Connect Python"; // optional module docstring}
 
+    // Main class
     py::class_<DexhandConnect>(m, "DexhandConnect")
         .def(py::init<>())
         .def("enumerateDevices", &DexhandConnect::enumerateDevices)
@@ -203,9 +204,15 @@ PYBIND11_MODULE(dexhand_connect_py, m) {
         })
         .def("unsubscribe", [](DexhandConnect& self, IDexhandMessageSubscriber<ServoVarsListMessage>& subscriber){
             self.unsubscribe(&subscriber);
+        })
+        .def("sendCommand", [](DexhandConnect& self, SetServoPositionsCommand& command){
+            self.sendCommand(command);
+        })
+        .def("sendCommand", [](DexhandConnect& self, SetServoVarsCommand& command){
+            self.sendCommand(command);
         });
     
-
+    // Subscribers
     py::class_<IDexhandMessageSubscriber<FirmwareVersionMessage>, PyIDexhandMessageSubscriber<FirmwareVersionMessage>>(m, "FirmwareVersionMessageSubscriber")
         .def(py::init<>())
         .def("messageReceived", &IDexhandMessageSubscriber<FirmwareVersionMessage>::messageReceived);
@@ -223,6 +230,21 @@ PYBIND11_MODULE(dexhand_connect_py, m) {
         .def("messageReceived", &IDexhandMessageSubscriber<ServoVarsListMessage>::messageReceived);
     
 
+    // Commands
+    py::class_<SetServoPositionsCommand>(m, "SetServoPositionsCommand")
+        .def(py::init<>())
+        .def("setServoPosition", &SetServoPositionsCommand::setServoPosition);
+
+    py::class_<SetServoVarsCommand>(m, "SetServoVarsCommand")
+        .def(py::init<>())
+        .def("setID", &SetServoVarsCommand::setID)
+        .def("setHWMinPosition", &SetServoVarsCommand::setHWMinPosition)
+        .def("setHWMaxPosition", &SetServoVarsCommand::setHWMaxPosition)
+        .def("setSWMinPosition", &SetServoVarsCommand::setSWMinPosition)
+        .def("setSWMaxPosition", &SetServoVarsCommand::setSWMaxPosition)
+        .def("setHomePosition", &SetServoVarsCommand::setHomePosition)
+        .def("setMaxLoadPct", &SetServoVarsCommand::setMaxLoadPct)
+        .def("setMaxTemp", &SetServoVarsCommand::setMaxTemp);
     
 
     

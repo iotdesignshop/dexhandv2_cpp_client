@@ -15,7 +15,7 @@ namespace dexhand_connect {
 class DexhandCommand {
     public:
         DexhandCommand(dexhand::DexhandMsgID id) : msgId(id) {}
-        virtual ~DexhandCommand() {}
+        virtual ~DexhandCommand() = default;
 
         virtual std::string serialize() const = 0;
 
@@ -30,16 +30,28 @@ class DexhandCommand {
 class SetServoPositionsCommand : public DexhandCommand {
     public:
         SetServoPositionsCommand() : DexhandCommand(dexhand::SERVO_POSITION_UPDATE_CMD) {}
-        std::string serialize() const override;
+        virtual std::string serialize() const override;
 
         /// @brief Adds a servo position to the message
         void setServoPosition(uint8_t servoID, uint16_t position) {
-            dexhand::ServoStatus* servo = msg.add_servos();
-            servo->set_servoid(servoID);
+            dexhand::ServoStatus* servo = findOrAddServo(servoID);
             servo->set_position(position);
         }
 
     private:
+        dexhand::ServoStatus* findOrAddServo(uint8_t servoID) {
+            for (int i = 0; i < msg.servos_size(); i++) {
+                if (msg.servos(i).servoid() == servoID) {
+                    return msg.mutable_servos(i);
+                }
+            }
+
+            // Not found, add a new one
+            dexhand::ServoStatus* servo =  msg.add_servos();
+            servo->set_servoid(servoID);
+            return servo;
+        }
+
         dexhand::ServoStatusList msg;
 };
 
@@ -49,7 +61,7 @@ class SetServoPositionsCommand : public DexhandCommand {
 class SetServoVarsCommand : public DexhandCommand {
     public:
         SetServoVarsCommand() : DexhandCommand(dexhand::SERVO_VARS_UPDATE_CMD) {}
-        std::string serialize() const override;
+        virtual std::string serialize() const override;
 
         void setID(uint8_t id) { msg.set_servoid(id); }
         void setSWMinPosition(uint16_t pos) { msg.set_swminposition(pos); }
