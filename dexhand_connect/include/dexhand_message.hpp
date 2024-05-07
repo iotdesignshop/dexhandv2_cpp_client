@@ -55,7 +55,7 @@ class ServoDynamicsMessage : public DexhandMessage {
 
         void parseMessage(const uint8_t* data, size_t size) override;
 
-        size_t getNumServos() const { return msg.servos_size(); }
+        size_t getNumServos() const { return servoStatus.size(); }
 
         class ServoStatus {
             public:
@@ -71,10 +71,11 @@ class ServoDynamicsMessage : public DexhandMessage {
                 const dexhand::ServoStatus& msg;
         };
 
-        const ServoStatus getServoStatus(size_t index) const { return ServoStatus(msg.servos(index)); }
-        
+        std::map<uint8_t, ServoStatus> getServoStatus() const { return servoStatus; }
+
     private:
         dexhand::ServoStatusList msg;
+        std::map<uint8_t, ServoStatus> servoStatus;
 };
 
 class ServoVarsListMessage : public DexhandMessage {
@@ -84,11 +85,13 @@ class ServoVarsListMessage : public DexhandMessage {
 
         void parseMessage(const uint8_t* data, size_t size) override;
 
-        size_t getNumServos() const { return msg.servos_size(); }
+        size_t getNumServos() const { return servoVars.size(); }
 
         class ServoVars {
             public:
                 ServoVars(const dexhand::ServoVars& vars) : msg(vars) {}
+                ~ServoVars() {}
+
 
                 uint8_t getServoID() const { return msg.servoid(); }
                 uint16_t getHWMinPosition() const { return msg.hwminposition(); }
@@ -103,10 +106,11 @@ class ServoVarsListMessage : public DexhandMessage {
                 const dexhand::ServoVars& msg;
         };
 
-        const ServoVars getServoVars(size_t index) const { return ServoVars(msg.servos(index)); }
+        std::map<uint8_t, ServoVars> getServoVars() const { return servoVars; }
         
     private:
         dexhand::ServoVarsList msg;
+        std::map<uint8_t, ServoVars> servoVars;
 };
 
 class FirmwareVersionMessage : public DexhandMessage {

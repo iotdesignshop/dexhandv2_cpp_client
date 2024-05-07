@@ -33,13 +33,13 @@ class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage
             cout << "Num servos: " << message.getNumServos() << endl;
             cout << "ID:\tStatus\tPos\tSpd\tLoad" << endl;
             cout << "------------------------------------" << endl;
-            for (size_t i = 0; i < message.getNumServos(); i++){
-                const ServoDynamicsMessage::ServoStatus& status = message.getServoStatus(i);
-                cout << (int)status.getServoID() << "\t";
-                cout << (int)status.getStatus() << "\t";
-                cout << status.getPosition() << "\t";
-                cout << status.getSpeed() << "\t";
-                cout << status.getLoad() << endl;
+
+            for (const auto& status : message.getServoStatus()){
+                cout << (int)status.first << "\t";
+                cout << (int)status.second.getStatus() << "\t";
+                cout << status.second.getPosition() << "\t";
+                cout << status.second.getSpeed() << "\t";
+                cout << status.second.getLoad() << endl;
             }
             cout << "------------------------------------" << endl << endl;
         }
@@ -52,17 +52,20 @@ class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessag
             cout << "Num servos: " << message.getNumServos() << endl;
             cout << "ID\tHWMin\tHWMax\tSWMin\tSWMax\tHome\tMaxLoad\tMaxTemp" << endl;
             cout << "------------------------------------------------------------------" << endl;
-            for (size_t i = 0; i < message.getNumServos(); i++){
-                const ServoVarsListMessage::ServoVars& vars = message.getServoVars(i);
-                cout << (int)vars.getServoID() << "\t";
-                cout << vars.getHWMinPosition() << "\t";
-                cout << vars.getHWMaxPosition() << "\t";
-                cout << vars.getSWMinPosition() << "\t";
-                cout << vars.getSWMaxPosition() << "\t";
-                cout << vars.getHomePosition() << "\t";
-                cout << (int)vars.getMaxLoadPct() << "\t";
-                cout << (int)vars.getMaxTemp() << endl;
+
+
+            // Iterate over each servo and print out the vars
+            for (const auto& vars : message.getServoVars()){
+                cout << (int)vars.first << "\t";
+                cout << vars.second.getHWMinPosition() << "\t";
+                cout << vars.second.getHWMaxPosition() << "\t";
+                cout << vars.second.getSWMinPosition() << "\t";
+                cout << vars.second.getSWMaxPosition() << "\t";
+                cout << vars.second.getHomePosition() << "\t";
+                cout << (int)vars.second.getMaxLoadPct() << "\t";
+                cout << (int)vars.second.getMaxTemp() << endl;
             }
+            
             cout << "------------------------------------" << endl << endl;
         }
 };
