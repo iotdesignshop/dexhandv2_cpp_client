@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <typeinfo>
+#include <mutex>
 
 #include "dexhand_message.hpp"
 #include "dexhand_command.hpp"
@@ -136,6 +137,10 @@ private:
             }
         }
     }
+
+    // Thread safety
+    std::mutex updateMutex;
+    std::mutex commandMutex;
     
 };
 

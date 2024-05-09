@@ -178,6 +178,9 @@ size_t DexhandConnect::readBytesAvailable() {
 }
 
 void DexhandConnect::update() {
+    // Avoid reentry
+    std::lock_guard<std::mutex> guard(updateMutex);
+
     // Message processing
     receiveUSBData();
     processMessages();
@@ -367,6 +370,7 @@ bool DexhandConnect::sendCommand(const DexhandCommand& command) {
     }
 
     // Send the command
+    std::lock_guard<std::mutex> guard(commandMutex);
     if (writeSerial(reinterpret_cast<const uint8_t*>(message.c_str()), message.size()) != message.size()) {
         cerr << "Error sending command" << endl;
         return false;
