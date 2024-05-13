@@ -10,8 +10,9 @@ This library currently is only scoped to build and run on linux systems. We test
 If you'd like to take a stab at getting it to compile for other platforms, we would welcome those PR's
 as it would be great to have it running on Windows, and MacOS as well.
 
-###
+### Packages
 
-__libudev__ Required for USB communications
+__libudev__ - Required for USB communications
+
 
 
