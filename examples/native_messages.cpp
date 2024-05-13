@@ -140,7 +140,8 @@ int main(int argc, char** argv){
     #define SERVO_MAX 114
     uint16_t testpos = 400;
 
-    hand.update();
+    // Reset hand to enable motion
+    hand.resetHand();
 
     // Tuning parameters
     /*SetServoVarsCommand varsCmd;

@@ -57,6 +57,10 @@ public:
     /// @brief Checks if the serial connection is open
     bool isSerialOpen() const { return serialFd != -1; }
 
+    /// @brief Resets the hand. This is required to initialize the hand to a known state at the start
+    /// of a session, but can also be called at any time to reset the hand to the default pose.
+    void resetHand();
+
     /// @brief Updates the connection to the Dexhand device. This should be called periodically
     /// to process incoming messages
     void update();

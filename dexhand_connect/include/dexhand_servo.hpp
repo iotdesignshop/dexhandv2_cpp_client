@@ -14,8 +14,10 @@ class Servo
 {
 public:
     Servo(uint8_t id);
+    Servo(uint8_t id, uint16_t hwMinPosition, uint16_t hwMaxPosition, uint16_t swMinPosition, uint16_t swMaxPosition, uint16_t homePosition, uint8_t maxLoadPct, uint8_t maxTemp);
     virtual ~Servo() = default;
 
+    uint8_t getID() const { return servoID; }
     uint8_t getStatus() const { return status; }
     uint16_t getPosition() const { return position; }
     int16_t getSpeed() const { return speed; }
@@ -44,11 +46,11 @@ public:
     uint8_t getMaxTemp() const { return maxTemp; }
     void setMaxTemp(uint8_t temp) { maxTemp = std::min(temp,(uint8_t)100); }
 
-    friend class ServoManager;
+    friend class FullServoStatusSubscriber;
+    friend class DynamicsSubscriber;
 
 protected:
 
-    void initVars(uint16_t hwMinPosition, uint16_t hwMaxPosition, uint16_t swMinPosition, uint16_t swMaxPosition, uint16_t homePosition, uint8_t maxLoadPct, uint8_t maxTemp);
     void setFullStatus(uint16_t position, int16_t speed, int16_t load, uint8_t temperature, uint8_t voltage, uint8_t status);
     void setDynamics(uint16_t position, int16_t speed, int16_t load, uint8_t status);
      

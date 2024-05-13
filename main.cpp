@@ -71,34 +71,60 @@ int main(int argc, char** argv){
     FirmwareVersionSubscriber firmwareSubscriber;
     hand.subscribe(&firmwareSubscriber);
 
+    // Set up the servo manager
+    ServoManager servoManager(hand);
+    servoManager.start();
+
+    // Reset the hand to enable motion
+    hand.resetHand();
+
+    // Wait for the servo manager to be ready
+    while (!servoManager.isReady()){
+        cout << "Waiting for ServoManager to be ready..." << endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    //servoManager.getServo(114)->setMaxTemp(70);
+    //servoManager.getServo(114)->setMaxLoadPct(50);
+
+    // Constants for our little animation test loop
     #define MIN_POS 400
     #define MAX_POS 1300
     #define SERVO_MIN 111
     #define SERVO_MAX 114
     uint16_t testpos = 400;
 
-    ServoManager servoManager(hand);
-    servoManager.start();
-
-    // Reset the hand
-    hand.sendCommand(ResetHandCommand());
-
-    // Wait for the servo manager to be ready
-    while (!servoManager.isReady()){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
     // Run until key press
     while(!kbhit()) {
-       // Send a command to set the position of a servo
+
+        // Update target
         SetServoPositionsCommand cmd;
         for (uint8_t i = SERVO_MIN; i <= SERVO_MAX; i++){
-            cmd.setServoPosition(i, testpos);
+            servoManager.getServo(i)->setTarget(testpos);
         }
-        hand.sendCommand(cmd);
         testpos += 20;
         if (testpos > MAX_POS){
             testpos = MIN_POS;
+        }
+
+        // Draw table of servos
+        cout << "ID\tStatus\tPos\tSpeed\tLoad\tVoltage\tTemp\thwMin\thwMax\tswMin\tswMax\thome\tload%\tmaxTemp" << endl;
+        cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
+        for (const auto& servo : servoManager.getServos()){
+            cout << (int)servo.second->getID() << "\t" 
+                << (int)servo.second->getStatus() << "\t" 
+                << servo.second->getPosition() << "\t" 
+                << servo.second->getSpeed() << "\t" 
+                << servo.second->getLoad() << "\t" 
+                << (int)servo.second->getVoltage() << "\t" 
+                << (int)servo.second->getTemperature() << "\t" 
+                << servo.second->getHWMinPosition() << "\t" 
+                << servo.second->getHWMaxPosition() << "\t" 
+                << servo.second->getSWMinPosition() << "\t" 
+                << servo.second->getSWMaxPosition() << "\t" 
+                << servo.second->getHomePosition() << "\t" 
+                << (int)servo.second->getMaxLoadPct() << "\t" 
+                << (int)servo.second->getMaxTemp() << endl;
         }
 
         // Limit updates to 50Hz

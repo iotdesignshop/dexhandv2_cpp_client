@@ -363,6 +363,10 @@ uint8_t DexhandConnect::calculateChecksum(const uint8_t* data, size_t size) {
     return checksum;
 }
 
+void DexhandConnect::resetHand() {
+    ResetHandCommand cmd;
+    sendCommand(cmd);
+}
 
 bool DexhandConnect::sendCommand(const DexhandCommand& command) {
     

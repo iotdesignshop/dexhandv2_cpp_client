@@ -8,15 +8,8 @@ namespace dexhand_connect {
 
 Servo::Servo(uint8_t id) : servoID(id) {}
 
-void Servo::initVars(uint16_t hwMinPosition, uint16_t hwMaxPosition, uint16_t swMinPosition, uint16_t swMaxPosition, uint16_t homePosition, uint8_t maxLoadPct, uint8_t maxTemp) {
-    this->hwMinPosition = hwMinPosition;
-    this->hwMaxPosition = hwMaxPosition;
-    this->swMinPosition = swMinPosition;
-    this->swMaxPosition = swMaxPosition;
-    this->homePosition = homePosition;
-    this->maxLoadPct = maxLoadPct;
-    this->maxTemp = maxTemp;
-}
+Servo::Servo(uint8_t id, uint16_t hMinP, uint16_t hMaxP, uint16_t sMinP, uint16_t sMaxP, uint16_t hp, uint8_t maxLoad, uint8_t maxTemp) 
+: servoID(id), hwMinPosition(hMinP), hwMaxPosition(hMaxP), swMinPosition(sMinP), swMaxPosition(sMaxP), homePosition(hp), maxLoadPct(maxLoad), maxTemp(maxTemp) {}
 
 void Servo::setFullStatus(uint16_t position, int16_t speed, int16_t load, uint8_t temperature, uint8_t voltage, uint8_t status) {
     this->position = position;

@@ -31,24 +31,37 @@ class ServoManager {
         /// @brief Checks if the ServoManager is ready to use
         /// @return true if the ServoManager is ready, false otherwise
         /// @note The ServoManager needs to receive the servo variables from the hand before it is ready to use.
-        bool isReady() const { return ready; }
+        bool isReady() const { return (servos.size() > 0); }
 
         /// @brief Shuts down the ServoManager - Call this to stop update threads and close communications to the hand
         void stop();
 
+        /// @brief Add a servo to the ServoManager
+        void addServo(std::shared_ptr<Servo> servo) { servos[servo->getID()] = servo;}
+
+        /// @brief Retrieve a servo by ID
+        /// @param id Servo ID
+        /// @return Pointer to the servo, or nullptr if not found
+        std::shared_ptr<Servo> getServo(uint8_t id) const {
+            auto it = servos.find(id);
+            if (it != servos.end()) {
+                return it->second;
+            }
+            return nullptr;
+        }
+
         /// @brief Retrieve active servos
         /// @return Map of servos
-        const std::map<uint8_t, Servo>& getServos() const { return servos; }
+        const std::map<uint8_t, std::shared_ptr<Servo>> getServos() const { return servos; }
 
     private:
-        bool ready = false;  
-
         DexhandConnect& dc;
         std::unique_ptr<FullServoStatusSubscriber> fullStatusSubscriber;
         std::unique_ptr<DynamicsSubscriber> dynamicsSubscriber;
         std::unique_ptr<ServoVarsSubscriber> varsSubscriber;
 
-        std::map<uint8_t, Servo> servos;
+        std::map<uint8_t, std::shared_ptr<Servo>> servos;
+        std::map<uint8_t, std::shared_ptr<Servo>> lastServos;
 
         bool run_threads = true;
 
@@ -57,6 +70,8 @@ class ServoManager {
 
         unsigned int rxFrequency = 100;
         unsigned int txFrequency = 20;
+
+        void sendServoMessages();
 };
 
 } // namespace dexhand_connect
