@@ -85,7 +85,7 @@ std::vector<DexhandConnect::DexhandUSBDevice> DexhandConnect::enumerateDevices()
 }
 
 
-DexhandConnect::DexhandConnect() : serialFd(-1) {
+DexhandConnect::DexhandConnect() : serialFd(-1), rxBytes(0), txBytes(0) {
     receivedData.reserve(MAX_MESSAGE_SIZE);
 }
 
@@ -138,8 +138,12 @@ bool DexhandConnect::openSerial(const string& port) {
     // Set the new options for the port
     tcsetattr(serialFd, TCSANOW, &options);
 
+    // Purge the input and output buffers
+    tcflush(serialFd, TCIOFLUSH);
+
     return true;
 }
+
 
 void DexhandConnect::closeSerial() {
     if (isSerialOpen()) {
@@ -155,6 +159,7 @@ size_t DexhandConnect::writeSerial(const uint8_t* data, size_t size) {
 
     // How much data is available in output stream?
     size_t result = write(serialFd, data, size);
+    txBytes += result;
     //tcdrain(serialFd);  // Flush
 
     return result;
@@ -213,10 +218,17 @@ void DexhandConnect::receiveUSBData() {
             for (size_t i = 0; i < bytesRead-sizeof(msgHeader); i++) {
                 if (isValidHeader(reinterpret_cast<msgHeader*>(data + i))) {
                     receivedData.insert(receivedData.end(), data + i, data + bytesRead);
+
                     break;
+                }
+                else {
+                    cerr << "Invalid header received." << endl;
                 }
             }
         }
+
+        rxBytes += bytesRead;
+        
     }
 
 }
@@ -245,11 +257,30 @@ void DexhandConnect::processMessages() {
 
         assert(isLittleEndian() && "This code will need to be updated for endianness");
         msgHeader* header = reinterpret_cast<msgHeader*>(receivedData.data());
+        if (isValidHeader(header) == false) {
+            cerr << "Bad header found in processMessages. Attempting to recover." << endl;
+            size_t goodHeader = 0;
+            for (size_t i = 0; i < receivedData.size()-sizeof(msgHeader); i++) {
+                if (isValidHeader(reinterpret_cast<msgHeader*>(receivedData.data() + i))) {
+                    goodHeader = i;
+                    break;
+                }
+            }
+            if (goodHeader > 0) {
+                cout << "Purged bad data" << endl;
+                receivedData.erase(receivedData.begin(), receivedData.begin() + goodHeader);
+            }
+            else {
+                cout << "Purged all data" << endl;
+                receivedData.clear();
+            }
+
+        }
         if (receivedData.size() < MESSAGE_HEADER_OVERHEAD + header->msgSize) {
             // Incomplete message - wait for more data
             break;
         }
-
+   
         // Check the checksum
         msgTail* tail = reinterpret_cast<msgTail*>(receivedData.data() + MESSAGE_HEADER_OVERHEAD + header->msgSize - MESSAGE_TAIL_SIZE);
         uint8_t checksum = calculateChecksum(&header->msgData, header->msgSize-MESSAGE_TAIL_SIZE);

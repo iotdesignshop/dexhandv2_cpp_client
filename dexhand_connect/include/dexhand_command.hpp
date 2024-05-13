@@ -25,6 +25,14 @@ class DexhandCommand {
         dexhand::DexhandMsgID msgId;
 };
 
+/// @brief Command to reset the hand to a known state. This called at the start of a DexHand session to initialize
+/// the hand to a known state. But, it can also be called at any time to reset the hand to the default pose if needed.
+class ResetHandCommand : public DexhandCommand {
+    public:
+        ResetHandCommand() : DexhandCommand(dexhand::RESET_HAND_CMD) {}
+        virtual std::string serialize() const override { return ""; }
+};
+
 
 /// @brief Command to set the position of one or more servos on the DexHand
 class SetServoPositionsCommand : public DexhandCommand {
@@ -69,6 +77,7 @@ class SetServoVarsCommand : public DexhandCommand {
         void setHomePosition(uint16_t pos) { msg.set_homeposition(pos); }
         void setMaxLoadPct(uint8_t load) { msg.set_maxloadpct(load); }
         void setMaxTemp(uint8_t temp) { msg.set_maxtemperature(temp); }
+        void setTorqueEnable(bool enable) { msg.set_torqueenable(enable); }
 
         /// @brief Sets the hardware minimum travel limit for the servo
         /// @note Do not adjust this value unless you are sure of the hardware limits as it can cause damage

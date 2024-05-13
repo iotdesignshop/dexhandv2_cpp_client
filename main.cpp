@@ -2,73 +2,19 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+
 #include "dexhand_connect.hpp"
+#include "dexhand_servomgr.hpp"
 #include "CLI11.hpp"
 
 
 using namespace dexhand_connect;
 using namespace std;
 
+int kbhit();
 
-
-class FullServoStatusSubscriber : public IDexhandMessageSubscriber<ServoFullStatusMessage> {
-    public:
-        void messageReceived(const ServoFullStatusMessage& message) override {
-            cout << "Full Status for Servo ID: " << (int)message.getServoID() << endl;
-            cout << "--------------------------------" << endl;
-            cout << "Status: " << (int)message.getStatus() << endl;
-            cout << "Position: " << message.getPosition() << endl;
-            cout << "Speed: " << message.getSpeed() << endl;
-            cout << "Load: " << message.getLoad() << endl;
-            cout << "Voltage: " << (int)message.getVoltage() << endl;
-            cout << "Temperature: " << (int)message.getTemperature() << endl;
-            cout << "--------------------------------" << endl << endl;
-        }
-};
-
-class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage> {
-    public:
-        void messageReceived(const ServoDynamicsMessage& message) override {
-            cout << "Dynamics message received" << endl;
-            cout << "Num servos: " << message.getNumServos() << endl;
-            cout << "ID:\tStatus\tPos\tSpd\tLoad" << endl;
-            cout << "------------------------------------" << endl;
-
-            for (const auto& status : message.getServoStatus()){
-                cout << (int)status.first << "\t";
-                cout << (int)status.second.getStatus() << "\t";
-                cout << status.second.getPosition() << "\t";
-                cout << status.second.getSpeed() << "\t";
-                cout << status.second.getLoad() << endl;
-            }
-            cout << "------------------------------------" << endl << endl;
-        }
-};
-
-class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessage> {
-    public:
-        void messageReceived(const ServoVarsListMessage& message) override {
-            cout << "Servo Vars message received" << endl;
-            cout << "Num servos: " << message.getNumServos() << endl;
-            cout << "ID\tHWMin\tHWMax\tSWMin\tSWMax\tHome\tMaxLoad\tMaxTemp" << endl;
-            cout << "------------------------------------------------------------------" << endl;
-
-
-            // Iterate over each servo and print out the vars
-            for (const auto& vars : message.getServoVars()){
-                cout << (int)vars.first << "\t";
-                cout << vars.second.getHWMinPosition() << "\t";
-                cout << vars.second.getHWMaxPosition() << "\t";
-                cout << vars.second.getSWMinPosition() << "\t";
-                cout << vars.second.getSWMaxPosition() << "\t";
-                cout << vars.second.getHomePosition() << "\t";
-                cout << (int)vars.second.getMaxLoadPct() << "\t";
-                cout << (int)vars.second.getMaxTemp() << endl;
-            }
-            
-            cout << "------------------------------------" << endl << endl;
-        }
-};
 
 class FirmwareVersionSubscriber : public IDexhandMessageSubscriber<FirmwareVersionMessage> {
     public:
@@ -122,15 +68,6 @@ int main(int argc, char** argv){
     }
 
     // Subscribe to messages
-    FullServoStatusSubscriber fullStatusSubscriber;
-    hand.subscribe(&fullStatusSubscriber);
-
-    DynamicsSubscriber dynamicsSubscriber;
-    hand.subscribe(&dynamicsSubscriber);
-
-    ServoVarsSubscriber varsSubscriber;
-    hand.subscribe(&varsSubscriber);
-
     FirmwareVersionSubscriber firmwareSubscriber;
     hand.subscribe(&firmwareSubscriber);
 
@@ -140,24 +77,20 @@ int main(int argc, char** argv){
     #define SERVO_MAX 114
     uint16_t testpos = 400;
 
-    hand.update();
+    ServoManager servoManager(hand);
+    servoManager.start();
 
-    // Tuning parameters
-    /*SetServoVarsCommand varsCmd;
-    varsCmd.setID(114);
-    varsCmd.setHWMaxPosition(1600);
-    varsCmd.setMaxLoadPct(50);
-    hand.sendCommand(varsCmd);
-    hand.update();*/
+    // Reset the hand
+    hand.sendCommand(ResetHandCommand());
 
-    
+    // Wait for the servo manager to be ready
+    while (!servoManager.isReady()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
-
-    
-    while(true) {
-        hand.update();
-        
-        // Send a command to set the position of a servo
+    // Run until key press
+    while(!kbhit()) {
+       // Send a command to set the position of a servo
         SetServoPositionsCommand cmd;
         for (uint8_t i = SERVO_MIN; i <= SERVO_MAX; i++){
             cmd.setServoPosition(i, testpos);
@@ -168,9 +101,37 @@ int main(int argc, char** argv){
             testpos = MIN_POS;
         }
 
-        // Don't hammer the device
+        // Limit updates to 50Hz
         std::this_thread::sleep_for(std::chrono::milliseconds(20));     //50Hz
-
     }
+
+    // Stop the servo manager
+     servoManager.stop();
+
     
+}
+
+int kbhit() {
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+    ch = getchar();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+    if (ch != EOF) {
+        ungetc(ch, stdin);
+        return 1;
+    }
+
+    return 0;
 }

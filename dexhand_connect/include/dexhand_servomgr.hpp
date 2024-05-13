@@ -5,11 +5,15 @@
 
 #include <map>
 #include <thread>
+#include <memory>
 
 #include "dexhand_servo.hpp"
 
 namespace dexhand_connect {
 class DexhandConnect;
+class FullServoStatusSubscriber;
+class DynamicsSubscriber;
+class ServoVarsSubscriber;
 
 /// @brief Class to manage the servos on the DexHand
 class ServoManager {
@@ -37,14 +41,22 @@ class ServoManager {
         const std::map<uint8_t, Servo>& getServos() const { return servos; }
 
     private:
-        bool ready = false;    
+        bool ready = false;  
+
         DexhandConnect& dc;
+        std::unique_ptr<FullServoStatusSubscriber> fullStatusSubscriber;
+        std::unique_ptr<DynamicsSubscriber> dynamicsSubscriber;
+        std::unique_ptr<ServoVarsSubscriber> varsSubscriber;
 
         std::map<uint8_t, Servo> servos;
 
         bool run_threads = true;
+
         std::thread rxThread;
         std::thread txThread;
+
+        unsigned int rxFrequency = 100;
+        unsigned int txFrequency = 20;
 };
 
 } // namespace dexhand_connect

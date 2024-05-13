@@ -141,6 +141,10 @@ private:
     // Thread safety
     std::mutex updateMutex;
     std::mutex commandMutex;
+
+    // Odometry
+    size_t rxBytes;
+    size_t txBytes;
     
 };
 
