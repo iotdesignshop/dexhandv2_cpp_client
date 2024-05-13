@@ -26,7 +26,8 @@ class DexhandCommand {
 };
 
 /// @brief Command to reset the hand to a known state. This called at the start of a DexHand session to initialize
-/// the hand to a known state. But, it can also be called at any time to reset the hand to the default pose if needed.
+/// the hand to a known state and to enable the hand to start moving. It can also be called at any time to reset 
+/// the hand to the default pose if needed.
 class ResetHandCommand : public DexhandCommand {
     public:
         ResetHandCommand() : DexhandCommand(dexhand::RESET_HAND_CMD) {}

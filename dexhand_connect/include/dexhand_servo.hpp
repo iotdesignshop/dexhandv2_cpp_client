@@ -10,6 +10,9 @@
 namespace dexhand_connect {
 class ServoManager;
 
+/// @brief Class to represent a single servo on the DexHand. This class is with the ServoManager to read and write the
+/// servo state at an abstract level. When using the ServoManager, the Servo objects are created and managed by the
+/// ServoManager, and the user interacts with the objects to read and set the servo state.
 class Servo
 {
 public:
@@ -17,33 +20,94 @@ public:
     Servo(uint8_t id, uint16_t hwMinPosition, uint16_t hwMaxPosition, uint16_t swMinPosition, uint16_t swMaxPosition, uint16_t homePosition, uint8_t maxLoadPct, uint8_t maxTemp);
     virtual ~Servo() = default;
 
+    /// @brief Retrieve the hardware ID of this servo
+    /// @return Servo ID
     uint8_t getID() const { return servoID; }
+
+    /// @brief Get current status of the servo
+    /// @return Bitfield of status flags
+    /// @see ServoStatusFlags in dexhand_message.hpp for definitions of the status flags
     uint8_t getStatus() const { return status; }
+
+    /// @brief Get the current position of the servo
+    /// @return Value from 0-4095 representing the servo position
     uint16_t getPosition() const { return position; }
+
+    /// @brief Get the current speed of the servo
+    /// @return Current speed
     int16_t getSpeed() const { return speed; }
+
+    /// @brief Get the current load on the servo
+    /// @return Current load in mA (0-1000mA)
     int16_t getLoad() const { return load; }
+
+    /// @brief Get the current voltage of the servo
+    /// @return Current voltage in volts*10, ie 60 = 6.0V
     uint8_t getVoltage() const { return voltage; }
+
+    /// @brief Get the current temperature of the servo
+    /// @return Current temperature in degrees C
     uint8_t getTemperature() const { return temperature; }
 
+    /// @brief Get the target position of the servo
+    /// @return Target position
     uint16_t getTarget() const { return target; }
+
+    /// @brief Set the target position of the servo
+    /// @param t Target position (0-4095)
     void setTarget(uint16_t t) { target = clampToSWLimits(t); }
 
+    /// @brief Get the hardware minimim position of the servo. You can't move the servo below this position.
+    /// @return Position (0-4095)
     uint16_t getHWMinPosition() const { return hwMinPosition; }
+
+    /// @brief Get the hardware maximum position of the servo. You can't move the servo above this position.
+    /// @return Position (0-4095)
     uint16_t getHWMaxPosition() const { return hwMaxPosition; }
 
+    /// @brief Get the software minimum position of the servo. This is a soft endpoint to tune the lower range of motion.
+    /// @return Position (0-4095)
     uint16_t getSWMinPosition() const { return swMinPosition; }
+
+    /// @brief  Set the software minimum position of the servo to tune it's lower range of motion. This value must be within the
+    /// hardware limits.
+    /// @param pos Position (0-4095)
     void setSWMinPosition(uint16_t pos) { assert(swMinPosition <= swMaxPosition); swMinPosition = clampToHWLimits(pos); }
 
+    /// @brief Get the software maximum position of the servo. This is a soft endpoint to tune the upper range of motion.
+    /// @return Position (0-4095)
     uint16_t getSWMaxPosition() const { return swMaxPosition; }
+
+    /// @brief Set the software maximum position of the servo to tune it's upper range of motion. This value must be within the
+    /// hardware limits.
+    /// @param pos Position (0-4095)
     void setSWMaxPosition(uint16_t pos) { assert(swMaxPosition <= swMinPosition); swMaxPosition = clampToHWLimits(pos); }
 
+    /// @brief Get the home position of the servo. This is the position the servo will move to when the hand is reset.
     uint16_t getHomePosition() const { return homePosition; }
+
+    /// @brief Set the home position of the servo. This position must be within the soft limits.
+    /// @param pos Position (0-4095)
     void setHomePosition(uint16_t pos) { homePosition = clampToSWLimits(pos); }
 
+    /// @brief Get the maximum load percentage of the servo. If the load exceeds this percentage for a couple seconds, 
+    /// the servo will stop moving and reduce torque to protect itself.
+    /// @return Load percentage (0-100)
     uint8_t getMaxLoadPct() const { return maxLoadPct; }
+
+    /// @brief Set the maximum load percentage of the servo. If the load exceeds this percentage for a couple seconds,
+    /// the servo will stop moving and reduce torque to protect itself.
+    /// @param pct Load percentage (0-100)
     void setMaxLoadPct(uint8_t pct) { maxLoadPct = std::min(pct,(uint8_t)100); }
 
+    /// @brief Get the maximum temperature of the servo. If the temperature exceeds this value, the servo will stop moving
+    /// and reduce torque to protect itself.
+    /// @return Temperature in degrees C
     uint8_t getMaxTemp() const { return maxTemp; }
+
+    /// @brief Set the maximum temperature of the servo. If the temperature exceeds this value, the servo will stop moving
+    /// and reduce torque to protect itself.
+    /// @param temp Temperature in degrees C
     void setMaxTemp(uint8_t temp) { maxTemp = std::min(temp,(uint8_t)100); }
 
     friend class FullServoStatusSubscriber;
