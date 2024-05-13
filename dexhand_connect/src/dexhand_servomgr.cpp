@@ -21,6 +21,7 @@ class FullServoStatusSubscriber : public IDexhandMessageSubscriber<ServoFullStat
         virtual ~FullServoStatusSubscriber() {}
 
         void messageReceived(const ServoFullStatusMessage& message) override {
+            if (!manager.isReady()) return;
             auto servo = manager.getServos().at(message.getServoID());
             if (servo)
                 servo->setFullStatus(message.getPosition(), message.getSpeed(), message.getLoad(), message.getTemperature(), message.getVoltage(), message.getStatus());
@@ -39,6 +40,7 @@ class DynamicsSubscriber : public IDexhandMessageSubscriber<ServoDynamicsMessage
         virtual ~DynamicsSubscriber() {}
 
         void messageReceived(const ServoDynamicsMessage& message) override {
+            if (!manager.isReady()) return;
             for (const auto& status : message.getServoStatus()){
                 auto servo = manager.getServos().at(status.first);
                 if (servo)
