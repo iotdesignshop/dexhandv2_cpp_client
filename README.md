@@ -31,7 +31,13 @@ __protobuf-compiler__ - For compiling proto files
 
 __libprotobuf-dev__ - Google Protocol Buffer library
 
-__pkg-config__
+__pkg-config__ - Configuration utility
+
+To install in Ubuntu:
+
+```(bash)
+sudo apt install libudev-dev protobuf-compiler libprotobuf-dev pkg-config
+```
 
 ## Installation
 
