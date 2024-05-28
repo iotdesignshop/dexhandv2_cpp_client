@@ -26,8 +26,11 @@ as it would be great to have it running on Windows, and MacOS as well.
 ### Packages
 
 __libudev-dev__ - Required for USB communications to the dexhand
+
 __protobuf-compiler__ - For compiling proto files
+
 __libprotobuf-dev__ - Google Protocol Buffer library
+
 __pkg-config__
 
 ## Installation
