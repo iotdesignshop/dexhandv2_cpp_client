@@ -154,7 +154,8 @@ void ServoManager::sendServoMessages() {
                 servo.second->getSWMaxPosition() != last->second->getSWMaxPosition() ||
                 servo.second->getHomePosition() != last->second->getHomePosition() ||
                 servo.second->getMaxLoadPct() != last->second->getMaxLoadPct() ||
-                servo.second->getMaxTemp() != last->second->getMaxTemp()) {
+                servo.second->getMaxTemp() != last->second->getMaxTemp() ||
+                servo.second->getTorqueEnableRequest() != last->second->getTorqueEnable()) {
 
                 SetServoVarsCommand varscmd;
                 varscmd.setID(servo.first);
@@ -179,6 +180,9 @@ void ServoManager::sendServoMessages() {
                 }
                 if (servo.second->getMaxTemp() != last->second->getMaxTemp()) {
                     varscmd.setMaxTemp(servo.second->getMaxTemp());
+                }
+                if (servo.second->getTorqueEnableRequest() != last->second->getTorqueEnable()) {
+                    varscmd.setTorqueEnable(servo.second->getTorqueEnableRequest());
                 }
 
                 dc.sendCommand(varscmd);

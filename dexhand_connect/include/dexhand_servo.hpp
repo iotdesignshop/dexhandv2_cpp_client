@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <assert.h>
+#include "dexhand_message.hpp"
 
 namespace dexhand_connect {
 class ServoManager;
@@ -110,15 +111,22 @@ public:
     /// @param temp Temperature in degrees C
     void setMaxTemp(uint8_t temp) { maxTemp = std::min(temp,(uint8_t)100); }
 
+    /// @brief Get the torque enable status of the servo
+    bool getTorqueEnable() const { return (getStatus() & static_cast<uint8_t>(ServoStatusFlags::TORQUE_OFF)) == 0; }
+
+    /// @brief Set the torque enable status of the servo
+    /// @param enable True to enable torque, false to disable
+    void setTorqueEnable(bool enable) { torqueEnableRequest = enable; }
+
     friend class FullServoStatusSubscriber;
     friend class DynamicsSubscriber;
+    friend class ServoManager;
 
 protected:
 
     void setFullStatus(uint16_t position, int16_t speed, int16_t load, uint8_t temperature, uint8_t voltage, uint8_t status);
     void setDynamics(uint16_t position, int16_t speed, int16_t load, uint8_t status);
-     
-    
+    bool getTorqueEnableRequest() const { return torqueEnableRequest; }
 
 private:
     uint8_t servoID = 0;
@@ -137,6 +145,7 @@ private:
     uint16_t homePosition = 0;
     uint8_t maxLoadPct = 0;
     uint8_t maxTemp = 0;
+    bool torqueEnableRequest = true;
 
     uint16_t clampToSWLimits(uint16_t pos) const { return pos < swMinPosition ? swMinPosition : (pos > swMaxPosition ? swMaxPosition : pos);}
     uint16_t clampToHWLimits(uint16_t pos) const { return pos < hwMinPosition ? hwMinPosition : (pos > hwMaxPosition ? hwMaxPosition : pos);}

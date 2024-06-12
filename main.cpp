@@ -24,6 +24,28 @@ class FirmwareVersionSubscriber : public IDexhandMessageSubscriber<FirmwareVersi
         }
 };
 
+void displayServoTable(const ServoManager& servoManager) {
+    cout << "ID\tStatus\tPos\tSpeed\tLoad\tVoltage\tTemp\thwMin\thwMax\tswMin\tswMax\thome\tload%\tmaxTemp" << endl;
+        cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
+        for (const auto& servo : servoManager.getServos()){
+            cout << (int)servo.second->getID() << "\t" 
+                << (int)servo.second->getStatus() << "\t" 
+                << servo.second->getPosition() << "\t" 
+                << servo.second->getSpeed() << "\t" 
+                << servo.second->getLoad() << "\t" 
+                << (int)servo.second->getVoltage() << "\t" 
+                << (int)servo.second->getTemperature() << "\t" 
+                << servo.second->getHWMinPosition() << "\t" 
+                << servo.second->getHWMaxPosition() << "\t" 
+                << servo.second->getSWMinPosition() << "\t" 
+                << servo.second->getSWMaxPosition() << "\t" 
+                << servo.second->getHomePosition() << "\t" 
+                << (int)servo.second->getMaxLoadPct() << "\t" 
+                << (int)servo.second->getMaxTemp() << endl;
+        }
+
+}
+
 
 int main(int argc, char** argv){
 
@@ -108,28 +130,13 @@ int main(int argc, char** argv){
         }
 
         // Draw table of servos
-        cout << "ID\tStatus\tPos\tSpeed\tLoad\tVoltage\tTemp\thwMin\thwMax\tswMin\tswMax\thome\tload%\tmaxTemp" << endl;
-        cout << "--------------------------------------------------------------------------------------------------------------------" << endl;
-        for (const auto& servo : servoManager.getServos()){
-            cout << (int)servo.second->getID() << "\t" 
-                << (int)servo.second->getStatus() << "\t" 
-                << servo.second->getPosition() << "\t" 
-                << servo.second->getSpeed() << "\t" 
-                << servo.second->getLoad() << "\t" 
-                << (int)servo.second->getVoltage() << "\t" 
-                << (int)servo.second->getTemperature() << "\t" 
-                << servo.second->getHWMinPosition() << "\t" 
-                << servo.second->getHWMaxPosition() << "\t" 
-                << servo.second->getSWMinPosition() << "\t" 
-                << servo.second->getSWMaxPosition() << "\t" 
-                << servo.second->getHomePosition() << "\t" 
-                << (int)servo.second->getMaxLoadPct() << "\t" 
-                << (int)servo.second->getMaxTemp() << endl;
-        }
+        displayServoTable(servoManager);
 
         // Limit updates to 50Hz
         std::this_thread::sleep_for(std::chrono::milliseconds(20));     //50Hz
     }
+    
+
 
     // Stop the servo manager
      servoManager.stop();
