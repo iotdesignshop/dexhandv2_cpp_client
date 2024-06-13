@@ -18,6 +18,11 @@ void Servo::setFullStatus(uint16_t position, int16_t speed, int16_t load, uint8_
     this->temperature = temperature;
     this->voltage = voltage;
     this->status = status;
+
+    // If torque is disabled, adjust the target to be current to avoid jumps
+    if (getTorqueEnable() == false) {
+        target = position;
+    }
 }
 
 void Servo::setDynamics(uint16_t position, int16_t speed, int16_t load, uint8_t status) {
@@ -25,6 +30,11 @@ void Servo::setDynamics(uint16_t position, int16_t speed, int16_t load, uint8_t 
     this->speed = speed;
     this->load = load;
     this->status = status;
+
+    // If torque is disabled, adjust the target to be current to avoid jumps
+    if (getTorqueEnable() == false) {
+        target = position;
+    }
 }
 
 } // namespace dexhand_connect
