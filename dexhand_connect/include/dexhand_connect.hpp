@@ -65,6 +65,11 @@ public:
     /// to process incoming messages
     void update();
 
+    /// @brief Commences thumb auto tuning sequence. See the Dexhand documentation for more information on how
+    /// to properly use this feature to tune the thumb dynamics.
+    void autoTuneThumb();
+
+
     /// @brief Subscribe to messages posted by the Dexhand device
     /// @tparam T Type of message to subscribe to
     /// @see dexhand_message.hpp for message types

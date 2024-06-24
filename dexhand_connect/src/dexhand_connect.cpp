@@ -371,6 +371,11 @@ void DexhandConnect::resetHand() {
     sendCommand(cmd);
 }
 
+void DexhandConnect::autoTuneThumb() {
+    AutoTuneThumbCommand cmd;
+    sendCommand(cmd);
+}
+
 bool DexhandConnect::sendCommand(const DexhandCommand& command) {
     
     if (!isSerialOpen()) {
