@@ -184,7 +184,10 @@ size_t DexhandConnect::readBytesAvailable() {
 
 void DexhandConnect::update() {
     // Avoid reentry
-    std::lock_guard<std::mutex> guard(updateMutex);
+    std::unique_lock<std::mutex> lock(updateMutex, std::try_to_lock);
+    if (!lock.owns_lock()) {
+        return;
+    }
 
     // Message processing
     receiveUSBData();
