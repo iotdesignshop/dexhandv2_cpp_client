@@ -99,5 +99,51 @@ class SetServoVarsCommand : public DexhandCommand {
         dexhand::ServoVars msg;
 };
 
+/// @brief Command to set a register on a servo. This is a low level command that you should only really 
+/// use if you know what you are doing. It is used to set a hardware register on a servo to a specific value. 
+/// @note The table of Feetech registers is available in the Feetech servo datasheet.
+class SetServoRegisterCommand : public DexhandCommand {
+    public:
+        SetServoRegisterCommand() : DexhandCommand(dexhand::SERVO_REGISTER_WRITE_CMD) {}
+        virtual std::string serialize() const override;
+
+        void setID(uint8_t id) { msg.set_servoid(id); }
+        void setAddress(uint8_t reg) { msg.set_address(reg); }
+
+        /// @brief Sets the value to write to the servo. Note that this may be an 8-bit or 16-bit value
+        /// @param val Value
+        void setValue(uint16_t val) { msg.set_value(val); }
+
+        /// @brief Sets the size of the value written. 8-bit values should contain 1 in this field, and 16-bit values should contain 2.
+        /// @param size Size in bytes
+        void setSize(uint8_t size) { msg.set_size(size); }
+
+    private:
+        dexhand::ServoRegister msg;
+};
+
+/// @brief Command to set the global hand parameters and options
+class SetHandParameterCommand : public DexhandCommand {
+    public:
+        SetHandParameterCommand() : DexhandCommand(dexhand::HAND_PARAMS_WRITE_CMD) {}
+        virtual std::string serialize() const override;
+
+        /// @brief Control auto thumb extensor. By default this is enabled on the hand so that you don't need to actively
+        /// manage the thumb extensor servo. If you want to control the thumb extensor servo manually, you can disable this, but
+        /// this requires active control of the extensor to avoid having the motors work against each other, so only do this if
+        /// you know what you are doing.
+        void setAutoThumbExtensor(bool enable) { msg.set_autothumbextensor(enable); }
+
+    private:
+        dexhand::HandParams msg;
+};
+
+/// @brief Sends a command to kick of the automatic tuning sequence for the thumb
+class AutoTuneThumbCommand : public DexhandCommand {
+    public:
+        AutoTuneThumbCommand() : DexhandCommand(dexhand::AUTO_TUNE_THUMB_CMD) {}
+        virtual std::string serialize() const override { return ""; }
+};
+
 } // namespace dexhand_connect
 

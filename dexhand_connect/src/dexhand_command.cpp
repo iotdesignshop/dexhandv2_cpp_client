@@ -21,4 +21,16 @@ namespace dexhand_connect {
         return out;
     }
 
+    std::string SetHandParameterCommand::serialize() const {
+        std::string out;
+        msg.SerializeToString(&out);
+        return out;
+    }
+
+    std::string SetServoRegisterCommand::serialize() const {
+        std::string out;
+        msg.SerializeToString(&out);
+        return out;
+    }
+
 } // namespace dexhand_connect
