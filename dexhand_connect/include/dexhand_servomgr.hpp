@@ -1,5 +1,8 @@
-/// @file dexhand_servomgr.hpp
-/// @brief DexHand ServoManager class
+/***
+ * @file dexhand_servomgr.hpp
+ * @brief The DexHand ServoManager class provides an abstraction interface to manage the servos on the DexHand. 
+ * @copyright Copyright (c) 2024 IoT Design Shop Inc.
+ */
 
 #pragma once
 

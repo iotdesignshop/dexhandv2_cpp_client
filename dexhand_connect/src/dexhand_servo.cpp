@@ -1,5 +1,8 @@
-/// @file dexhand_servo.cpp
-/// @brief DexHand Servo class implementation
+/***
+ * @file dexhand_servo.cpp
+ * @brief DexHand Servo class implementation
+ * @copyright Copyright (c) 2024 IoT Design Shop Inc.
+ */
 
 
 #include "dexhand_servo.hpp"

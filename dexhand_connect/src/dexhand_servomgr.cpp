@@ -1,5 +1,8 @@
-/// @file dexhand_servomgr.cpp
-/// @brief DexHand ServoManager class implementation
+/***
+ * @file dexhand_servomgr.cpp
+ * @brief DexHand Servo Manager class implementation
+ * @copyright Copyright (c) 2024 IoT Design Shop Inc.
+ */
 
 #include <thread>
 #include <chrono>

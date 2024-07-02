@@ -95,7 +95,7 @@ int main(int argc, char** argv){
 
     // Set up the servo manager
     ServoManager servoManager(hand);
-    servoManager.start();
+    servoManager.start(100,50);
 
     // Reset the hand to enable motion
     hand.resetHand();
@@ -106,27 +106,41 @@ int main(int argc, char** argv){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    //servoManager.getServo(114)->setMaxTemp(70);
-    //servoManager.getServo(114)->setMaxLoadPct(50);
-
-    // Constants for our little animation test loop
-    #define MIN_POS 400
-    #define MAX_POS 1300
-    #define SERVO_MIN 111
-    #define SERVO_MAX 114
-    uint16_t testpos = 400;
-
+    
+    // Run through the range of motion on fingers and thumb
+    uint16_t servoIDs[5][3] = {
+        {101,102,111},
+        {103,104,112},
+        {105,106,113},
+        {107,108,114},
+        {109,110,115}
+    };
+    
     // Run until key press
+    uint16_t finger;
+    float v = 0;
+    float d = 0.01;
+
+
     while(!kbhit()) {
 
-        // Update target
-        SetServoPositionsCommand cmd;
-        for (uint8_t i = SERVO_MIN; i <= SERVO_MAX; i++){
-            servoManager.getServo(i)->setTarget(testpos);
+        // Move our position
+        v += d;
+        if (v > 1){ // Top of range? Go back down
+            v = 1;
+            d = -d;
         }
-        testpos += 20;
-        if (testpos > MAX_POS){
-            testpos = MIN_POS;
+        if (v < 0){ // Bottom of range? Next finger, and Go back up
+            if (++finger > 4) {
+                finger = 0;
+            }
+            v = 0;
+            d = -d;
+        }
+
+        // Set the target position of the servo
+        for (int i = 0; i < 3; i++){
+            servoManager.getServo(servoIDs[finger][i])->setTargetNormalized(v);
         }
 
         // Draw table of servos

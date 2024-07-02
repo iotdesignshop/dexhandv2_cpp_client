@@ -1,5 +1,8 @@
-/// @file dexhand_servo.hpp
-/// @brief DexHand Servo class
+/***
+ * @file dexhand_servo.hpp
+ * @brief The DexHand Servo class abstracts a single servo on the DexHand and provides methods to read and set the servo state.
+ * @copyright Copyright (c) 2024 IoT Design Shop Inc.
+ */
 
 #pragma once
 
@@ -57,6 +60,14 @@ public:
     /// @brief Set the target position of the servo
     /// @param t Target position (0-4095)
     void setTarget(uint16_t t) { target = clampToSWLimits(t); }
+
+    /// @brief Get the target position normalized to the software limits
+    /// @return Normalized target position (0-1)
+    float getTargetNormalized() const { return static_cast<float>(target - swMinPosition) / (swMaxPosition - swMinPosition); }  
+
+    /// @brief Set the target position normalized to the software limits
+    /// @param t Normalized target position (0-1)
+    void setTargetNormalized(float t) { setTarget(static_cast<uint16_t>(clampN(t) * (swMaxPosition - swMinPosition) + swMinPosition)); }
 
     /// @brief Get the hardware minimim position of the servo. You can't move the servo below this position.
     /// @return Position (0-4095)
@@ -149,6 +160,7 @@ private:
 
     uint16_t clampToSWLimits(uint16_t pos) const { return pos < swMinPosition ? swMinPosition : (pos > swMaxPosition ? swMaxPosition : pos);}
     uint16_t clampToHWLimits(uint16_t pos) const { return pos < hwMinPosition ? hwMinPosition : (pos > hwMaxPosition ? hwMaxPosition : pos);}
+    float clampN(float pos) const { return pos < 0.0f ? 0.0f : (pos > 1.0f ? 1.0f : pos); }
 };
 
 

@@ -9,6 +9,7 @@ add_executable(sample-client
     main.cpp
 )
 
+
 # Add dexhand-connect library
 add_subdirectory(dexhand_connect)
 target_link_libraries(sample-client 

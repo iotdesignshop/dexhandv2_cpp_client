@@ -1,3 +1,7 @@
+/// @file native_messages.cpp
+/// @brief Example of using the DexHand Connect library to communicate with the hand using native messages
+
+
 #include <iostream>
 #include <chrono>
 #include <thread>

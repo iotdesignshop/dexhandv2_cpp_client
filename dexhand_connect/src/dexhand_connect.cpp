@@ -1,3 +1,10 @@
+/***
+ * @file dexhand_connect.cpp
+ * @brief Main DexHand Connect class implementation
+ * @copyright Copyright (c) 2024 IoT Design Shop Inc.
+ */
+
+
 #include <iostream>
 #include <unistd.h>
 #include <fcntl.h>
