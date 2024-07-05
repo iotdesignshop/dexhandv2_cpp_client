@@ -394,7 +394,7 @@ bool DexhandConnect::sendCommand(const DexhandCommand& command) {
 
     // Create the message header - it is: 0xff, msgId, msgSize
     string headerData;
-    headerData.push_back(0xff);
+    headerData.push_back(static_cast<uint8_t>(0xff));
     headerData.push_back(static_cast<uint8_t>(command.getMessageID()));
     
     assert(isLittleEndian() && "This code will need to be updated for endianness");

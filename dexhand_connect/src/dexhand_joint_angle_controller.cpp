@@ -67,6 +67,10 @@ void fingerMixer(JointAngleController::JointID joint, const MechanicalMapping* m
             pm = mapping[joint - 1];
             ym = mapping[joint];
             break;
+
+        default:
+            // Invalid joint
+            return;
     }
 
     // Normalize angles
@@ -119,6 +123,10 @@ void thumbMixer(JointAngleController::JointID joint, const MechanicalMapping* ma
             ym = mapping[joint - 1];
             fm = mapping[joint];
             break;
+
+        default:
+            // Invalid joint
+            return;
     }
 
     // Normalize angles
