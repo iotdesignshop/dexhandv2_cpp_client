@@ -126,11 +126,17 @@ int main(int argc, char** argv){
     }
 
     // Subscribe to messages
-    hand.subscribe<ServoFullStatusMessage>(std::make_shared<FullServoStatusSubscriber>());
-    hand.subscribe<ServoDynamicsMessage>(std::make_shared<DynamicsSubscriber>());   
-    hand.subscribe<ServoVarsListMessage>(std::make_shared<ServoVarsSubscriber>());
-    hand.subscribe<FirmwareVersionMessage>(std::make_shared<FirmwareVersionSubscriber>());
+    FullServoStatusSubscriber fullStatusSubscriber;
+    hand.subscribe(&fullStatusSubscriber);
 
+    DynamicsSubscriber dynamicsSubscriber;
+    hand.subscribe(&dynamicsSubscriber);
+
+    ServoVarsSubscriber varsSubscriber;
+    hand.subscribe(&varsSubscriber);
+
+    FirmwareVersionSubscriber firmwareSubscriber;
+    hand.subscribe(&firmwareSubscriber);
 
     #define MIN_POS 400
     #define MAX_POS 1300

@@ -74,7 +74,8 @@ int main(int argc, char** argv){
     }
 
     // Subscribe to messages
-    hand.subscribe<FirmwareVersionMessage>(std::make_shared<FirmwareVersionSubscriber>());
+    FirmwareVersionSubscriber firmwareSubscriber;
+    hand.subscribe(&firmwareSubscriber);
 
     // Reset hand to enable motion
     hand.resetHand();

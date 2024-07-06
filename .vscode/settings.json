@@ -67,7 +67,6 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "__nullptr": "cpp",
-        "ios": "cpp"
+        "__nullptr": "cpp"
     }
 }

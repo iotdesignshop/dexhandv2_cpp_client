@@ -12,7 +12,6 @@
 #include <typeindex>
 #include <typeinfo>
 #include <mutex>
-#include <memory>
 
 #include "dexhand_message.hpp"
 #include "dexhand_command.hpp"
@@ -27,33 +26,6 @@ class IDexhandMessageSubscriber {
         virtual ~IDexhandMessageSubscriber() {}
         virtual void messageReceived(const T& message) = 0;
 };
-
-class ISubscriberList {
-    public:
-        virtual ~ISubscriberList()  = default;
-};
-
-template<typename T>
-class SubscriberList : public ISubscriberList{
-    public:
-        void addSubscriber(std::shared_ptr<IDexhandMessageSubscriber<T>> subscriber) {
-            subscribers.push_back(subscriber);
-        }
-
-        void removeSubscriber(std::shared_ptr<IDexhandMessageSubscriber<T>> subscriber) {
-            subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), subscriber), subscribers.end());
-        }
-
-        void notifySubscribers(const T& message) {
-            for (auto sub : subscribers) {
-                sub->messageReceived(message);
-            }
-        }
-
-    private:
-        std::vector<std::shared_ptr<IDexhandMessageSubscriber<T>>> subscribers;
-};
-
 
 
 /// @brief Main interface to the Dexhand Connect library
@@ -103,13 +75,8 @@ public:
     /// @see dexhand_message.hpp for message types
     /// @param subscriber Object wishing to receive the messages
     template<class T>
-    void subscribe(std::shared_ptr<IDexhandMessageSubscriber<T>> subscriber) {
-        if (subscribers.find(typeid(T)) == subscribers.end()) {
-            subscribers[typeid(T)] = std::make_shared<SubscriberList<T>>();
-        }
-
-        auto derivedPtr = std::static_pointer_cast<SubscriberList<T>>(subscribers[typeid(T)]);
-        derivedPtr->addSubscriber(subscriber);
+    void subscribe(IDexhandMessageSubscriber<T>* subscriber) {
+        subscribers[typeid(T)].push_back(static_cast<void*>(subscriber));
     }
 
     /// @brief Unsubscribe from messages posted by the Dexhand device
@@ -117,9 +84,9 @@ public:
     /// @see dexhand_message.hpp for message types
     /// @param subscriber Object wishing to stop receiving the messages
     template<class T>
-    void unsubscribe(std::shared_ptr<IDexhandMessageSubscriber<T>> subscriber) {
-        auto derivedPtr = std::static_pointer_cast<SubscriberList<T>>(subscribers[typeid(T)]);
-        derivedPtr->removeSubscriber(subscriber);
+    void unsubscribe(IDexhandMessageSubscriber<T>* subscriber) {
+        auto& subs = subscribers[typeid(T)];
+        subs.erase(std::remove(subs.begin(), subs.end(), subscriber), subs.end());
     }
 
     /// @brief Sends a command to the Dexhand device
@@ -167,15 +134,16 @@ private:
     uint8_t calculateChecksum(const uint8_t* data, size_t size);
 
     // Message subscribers
-    std::unordered_map<std::type_index, std::shared_ptr<ISubscriberList>> subscribers;
+    std::unordered_map<std::type_index, std::vector<void*>> subscribers;
 
     // Notifies subscribers of a message
     template<typename T>
     void notifyMessageSubscribers(const T& message) {
         auto subs = subscribers.find(typeid(T));
         if (subs != subscribers.end()) {
-            auto derivedPtr = std::static_pointer_cast<SubscriberList<T>>(subs->second);
-            derivedPtr->notifySubscribers(message);
+            for (auto sub : subs->second) {
+                static_cast<IDexhandMessageSubscriber<T>*>(sub)->messageReceived(message);
+            }
         }
     }
 
