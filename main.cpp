@@ -90,8 +90,7 @@ int main(int argc, char** argv){
     }
 
     // Subscribe to messages
-    FirmwareVersionSubscriber firmwareSubscriber;
-    hand.subscribe(&firmwareSubscriber);
+    hand.subscribe<FirmwareVersionMessage>(std::make_shared<FirmwareVersionSubscriber>());
 
     // Set up the servo manager
     ServoManager servoManager(hand);

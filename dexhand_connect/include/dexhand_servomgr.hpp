@@ -59,9 +59,9 @@ class ServoManager {
 
     private:
         DexhandConnect& dc;
-        std::unique_ptr<FullServoStatusSubscriber> fullStatusSubscriber;
-        std::unique_ptr<DynamicsSubscriber> dynamicsSubscriber;
-        std::unique_ptr<ServoVarsSubscriber> varsSubscriber;
+        std::shared_ptr<FullServoStatusSubscriber> fullStatusSubscriber;
+        std::shared_ptr<DynamicsSubscriber> dynamicsSubscriber;
+        std::shared_ptr<ServoVarsSubscriber> varsSubscriber;
 
         std::map<uint8_t, std::shared_ptr<Servo>> servos;
         std::map<uint8_t, std::shared_ptr<Servo>> lastServos;

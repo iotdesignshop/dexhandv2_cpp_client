@@ -16,6 +16,8 @@ using namespace std;
 
 namespace dexhand_connect {
 
+    
+
 
 
 class FullServoStatusSubscriber : public IDexhandMessageSubscriber<ServoFullStatusMessage> {
@@ -75,9 +77,9 @@ class ServoVarsSubscriber : public IDexhandMessageSubscriber<ServoVarsListMessag
 
 ServoManager::ServoManager(DexhandConnect& connect) : 
     dc(connect), 
-    fullStatusSubscriber(new FullServoStatusSubscriber(*this)),
-    dynamicsSubscriber(new DynamicsSubscriber(*this)),
-    varsSubscriber(new ServoVarsSubscriber(*this)) 
+    fullStatusSubscriber(std::make_shared<FullServoStatusSubscriber>(*this)),
+    dynamicsSubscriber(std::make_shared<DynamicsSubscriber>(*this)),
+    varsSubscriber(std::make_shared<ServoVarsSubscriber>(*this)) 
     {}
 
 ServoManager::~ServoManager() {
@@ -89,9 +91,9 @@ bool ServoManager::start(unsigned int rxFreq, unsigned int txFreq) {
     run_threads = true;
 
     // Subscribe to messages
-    dc.subscribe(fullStatusSubscriber.get());
-    dc.subscribe(dynamicsSubscriber.get());
-    dc.subscribe(varsSubscriber.get());
+    dc.subscribe<ServoFullStatusMessage>(fullStatusSubscriber);
+    dc.subscribe<ServoDynamicsMessage>(dynamicsSubscriber);
+    dc.subscribe<ServoVarsListMessage>(varsSubscriber);
 
     rxFrequency = rxFreq;
     txFrequency = txFreq;
@@ -128,9 +130,9 @@ void ServoManager::stop() {
     }
 
     // Unsubscribe from messages
-    dc.unsubscribe(fullStatusSubscriber.get());
-    dc.unsubscribe(dynamicsSubscriber.get());
-    dc.unsubscribe(varsSubscriber.get());
+    dc.unsubscribe<ServoFullStatusMessage>(fullStatusSubscriber);
+    dc.unsubscribe<ServoDynamicsMessage>(dynamicsSubscriber);
+    dc.unsubscribe<ServoVarsListMessage>(varsSubscriber);
 }
 
 void ServoManager::sendServoMessages() {
