@@ -153,6 +153,7 @@ static Mixer mixers[NUM_MIX_TYPES] = {
     thumbMixer
 };
 
+
 JointAngleController::JointAngleController(ServoManager& servoManager) : sm(servoManager) {
 }
 
@@ -165,6 +166,7 @@ void JointAngleController::start() {
                 id += 100;
             }
         }
+        rightHand = false;
     }
 }
 

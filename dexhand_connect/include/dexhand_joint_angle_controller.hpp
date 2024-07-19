@@ -99,8 +99,12 @@ class JointAngleController {
         /// @param min Minimum angle
         void setJointRange(JointID jointID, float min, float max);
 
+        /// @brief Get the handedness of the hand
+        bool isRightHand() const { return rightHand; }
+
     private:
         ServoManager& sm;
+        bool rightHand = true;
         float jointAngles[NUM_JOINT_IDS] = {0.0f};
 
         

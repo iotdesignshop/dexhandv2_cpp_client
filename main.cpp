@@ -117,7 +117,7 @@ int main(int argc, char** argv){
     };
     
     // Run until key press
-    uint16_t finger;
+    uint16_t finger = 0;
     float v = 0;
     float d = 0.01;
 
