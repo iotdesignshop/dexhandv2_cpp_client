@@ -201,7 +201,9 @@ void JointAngleController::setJointAngle(JointID jointID, float angle) {
     jointAngles[jointID] = angle;
 
     // Call mixer for this joint
-    mixers[mechanicalMappings[jointID].mixer](jointID, mechanicalMappings, jointAngles, sm);
+    if(sm.isReady()) {
+        mixers[mechanicalMappings[jointID].mixer](jointID, mechanicalMappings, jointAngles, sm);
+    }
 } 
 
 
