@@ -113,19 +113,19 @@ class JointAngleController {
         MechanicalMapping mechanicalMappings[NUM_JOINT_IDS] = {
             {0.0f, 75.0f, {101,102}, MixType::MIX_FINGER},       // index_pitch
             {-20.0f, 20.0f, {101, 102}, MixType::MIX_FINGER},    // index_yaw
-            {0.0f, 90.0f, {111}, MixType::MIX_LINEAR},           // index_flexor
+            {0.0f, 60.0f, {111}, MixType::MIX_LINEAR},           // index_flexor
             {0.0f, 75.0f, {103,104}, MixType::MIX_FINGER},       // middle_pitch
             {-20.0f, 20.0f, {103, 104}, MixType::MIX_FINGER},    // middle_yaw
-            {0.0f, 90.0f, {112}, MixType::MIX_LINEAR},           // middle_flexor
+            {0.0f, 60.0f, {112}, MixType::MIX_LINEAR},           // middle_flexor
             {0.0f, 75.0f, {105,106}, MixType::MIX_FINGER},       // ring_pitch
             {-20.0f, 20.0f, {105, 106}, MixType::MIX_FINGER},    // ring_yaw
-            {0.0f, 90.0f, {113}, MixType::MIX_LINEAR},           // ring_flexor
+            {0.0f, 60.0f, {113}, MixType::MIX_LINEAR},           // ring_flexor
             {0.0f, 75.0f, {107,108}, MixType::MIX_FINGER},       // pinky_pitch
             {-20.0f, 20.0f, {107, 108}, MixType::MIX_FINGER},    // pinky_yaw
-            {0.0f, 90.0f, {114}, MixType::MIX_LINEAR},           // pinky_flexor
+            {0.0f, 60.0f, {114}, MixType::MIX_LINEAR},           // pinky_flexor
             {0.0f, 60.0f, {109,110,115}, MixType::MIX_THUMB},   // thumb_pitch
             {-30.0f, 30.0f, {109,110,115}, MixType::MIX_THUMB},// thumb_yaw
-            {0.0f, 90.0f, {109,110,115}, MixType::MIX_THUMB}   // thumb_flexor
+            {0.0f, 60.0f, {109,110,115}, MixType::MIX_THUMB}   // thumb_flexor
         };
 
 
