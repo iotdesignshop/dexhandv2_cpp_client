@@ -132,11 +132,8 @@ void thumbMixer(JointAngleController::JointID joint, const MechanicalMapping* ma
     // Normalize angles
     pitchAngle = clampAndNormalize(pitchAngle, pm);
     flexorAngle = clampAndNormalize(flexorAngle, fm);
-    yawAngle = clamp(yawAngle, ym);
-    yawAngle = yawAngle / (ym.maxAngle); // Center around 0.0
+    yawAngle = clampAndNormalize(yawAngle, ym);
     
-    // Yaw of 30 degrees is approximately 50% of normalized range of servo travel
-    yawAngle *= 0.5;
 
     // Flexor needs some gain applied if pitch is high
     flexorAngle = MIN(flexorAngle + 0.5* pitchAngle, 1.0);

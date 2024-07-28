@@ -124,7 +124,7 @@ class JointAngleController {
             {-20.0f, 20.0f, {107, 108}, MixType::MIX_FINGER},    // pinky_yaw
             {0.0f, 60.0f, {114}, MixType::MIX_LINEAR},           // pinky_flexor
             {0.0f, 60.0f, {109,110,115}, MixType::MIX_THUMB},   // thumb_pitch
-            {-30.0f, 30.0f, {109,110,115}, MixType::MIX_THUMB},// thumb_yaw
+            {-30.0f, 30.0f, {109,110,115}, MixType::MIX_THUMB}, // thumb_yaw
             {0.0f, 60.0f, {109,110,115}, MixType::MIX_THUMB}   // thumb_flexor
         };
 
