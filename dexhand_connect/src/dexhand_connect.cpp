@@ -383,6 +383,12 @@ void DexhandConnect::autoTuneThumb() {
     sendCommand(cmd);
 }
 
+void DexhandConnect::enableAutoThumbExtensor(bool enable) {
+    SetHandParameterCommand cmd;
+    cmd.setAutoThumbExtensor(enable);
+    sendCommand(cmd);
+}
+    
 bool DexhandConnect::sendCommand(const DexhandCommand& command) {
     
     if (!isSerialOpen()) {

@@ -65,6 +65,10 @@ public:
     /// to process incoming messages
     void update();
 
+    /// @brief Enables or disables the automatic thumb exensor feature on the hand. This defaults to on, and means
+    /// that the thumb extensor servo will automatically adjust its position to complement the thumb flexor servo.
+    void enableAutoThumbExtensor(bool enable);
+
     /// @brief Commences thumb auto tuning sequence. See the Dexhand documentation for more information on how
     /// to properly use this feature to tune the thumb dynamics.
     void autoTuneThumb();
