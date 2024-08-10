@@ -95,7 +95,7 @@ int main(int argc, char** argv){
 
     // Set up the servo manager
     ServoManager servoManager(hand);
-    servoManager.start(100,50);
+    servoManager.start(20, 50);
 
     // Reset the hand to enable motion
     hand.resetHand();

@@ -96,6 +96,11 @@ bool ServoManager::start(unsigned int rxFreq, unsigned int txFreq) {
     rxFrequency = rxFreq;
     txFrequency = txFreq;
 
+    // Set the servo dynamics message frequency to match the receive frequency
+    SetHandParameterCommand freqCmd;
+    freqCmd.setMediumPriorityTimer(1000/rxFrequency);
+    dc.sendCommand(freqCmd);
+
     // Start the receive thread
     rxThread = std::thread([&](){
         while (run_threads) {

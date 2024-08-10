@@ -82,7 +82,7 @@ int main(int argc, char** argv){
 
     // Set up the servo manager
     ServoManager servoManager(hand);
-    servoManager.start(100,50);
+    servoManager.start(20, 50);
 
     // Wait for the servo manager to be ready
     while (!servoManager.isReady()){
@@ -108,9 +108,9 @@ int main(int argc, char** argv){
             cout << "Moving " << controller.jointNames[joint] << " through range of motion..." << endl;
             float min = controller.getJointMin(joint);
             float max = controller.getJointMax(joint);
-            for (float angle = min; angle < max; angle++){
+            for (float angle = min; angle < max; angle += 0.1f){
                 controller.setJointAngle(joint, angle);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             controller.setJointAngle(joint, min);
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -128,9 +128,9 @@ int main(int argc, char** argv){
             cout << "Moving " << controller.jointNames[joint] << " through range of motion..." << endl;
             float min = controller.getJointMin(joint);
             float max = controller.getJointMax(joint);
-            for (float angle = min; angle < max; angle++){
+            for (float angle = min; angle < max; angle += 0.1f){
                 controller.setJointAngle(joint, angle);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             controller.setJointAngle(joint, min);
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -150,19 +150,19 @@ int main(int argc, char** argv){
             float max = controller.getJointMax(joint);
 
             // Move to min
-            for (float angle = 0; angle > min; angle--){
+            for (float angle = 0; angle > min; angle -= 0.1f){
                 controller.setJointAngle(joint, angle);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             // Move from min to max
-            for (float angle = min; angle < max; angle++){
+            for (float angle = min; angle < max; angle += 0.1f){
                 controller.setJointAngle(joint, angle);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             // Move from max to 0
-            for (float angle = max; angle > 0; angle--){
+            for (float angle = max; angle > 0; angle -= 0.1f){
                 controller.setJointAngle(joint, angle);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
 
         }
@@ -170,20 +170,20 @@ int main(int argc, char** argv){
         // Fourth move through pitch + flexor on all fingers
         for (int c = 0; c < 4; ++c) {
             cout << "Moving " << controller.jointNames[pitchJoints[c]] << " and " << controller.jointNames[flexJoints[c]] << " through range of motion..." << endl;
-            for (float p = 0; p <= 100.0; p+=1.0) {
+            for (float p = 0; p <= 100.0; p += 0.1f) {
                 float pa = controller.getJointMin(pitchJoints[c]) + (controller.getJointMax(pitchJoints[c]) - controller.getJointMin(pitchJoints[c])) * p / 100.0;
                 float fa = controller.getJointMin(flexJoints[c]) + (controller.getJointMax(flexJoints[c]) - controller.getJointMin(flexJoints[c])) * p / 100.0;
                 controller.setJointAngle(pitchJoints[c], pa);
                 controller.setJointAngle(flexJoints[c], fa);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
 
-            for (float p = 100.0; p >= 0; p-=1.0) {
+            for (float p = 100.0; p >= 0; p -= 0.1f) {
                 float pa = controller.getJointMin(pitchJoints[c]) + (controller.getJointMax(pitchJoints[c]) - controller.getJointMin(pitchJoints[c])) * p / 100.0;
                 float fa = controller.getJointMin(flexJoints[c]) + (controller.getJointMax(flexJoints[c]) - controller.getJointMin(flexJoints[c])) * p / 100.0;
                 controller.setJointAngle(pitchJoints[c], pa);
                 controller.setJointAngle(flexJoints[c], fa);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             
             }
         }

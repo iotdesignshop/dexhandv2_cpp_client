@@ -138,8 +138,8 @@ int main(int argc, char** argv){
     FirmwareVersionSubscriber firmwareSubscriber;
     hand.subscribe(&firmwareSubscriber);
 
-    #define MIN_POS 400
-    #define MAX_POS 1300
+    #define MIN_POS 1500
+    #define MAX_POS 2500
     #define SERVO_MIN 111
     #define SERVO_MAX 114
     uint16_t testpos = 400;
@@ -156,8 +156,6 @@ int main(int argc, char** argv){
     hand.update();*/
 
     
-
-
     
     while(true) {
         hand.update();

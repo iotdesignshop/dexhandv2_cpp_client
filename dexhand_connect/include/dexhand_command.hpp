@@ -134,6 +134,18 @@ class SetHandParameterCommand : public DexhandCommand {
         /// you know what you are doing.
         void setAutoThumbExtensor(bool enable) { msg.set_autothumbextensor(enable); }
 
+        /// @brief Set the timer for the medium priority message loop on the hand. This loop is responsible
+        /// for reporting servo dynamics messages. The default value is 100, or 10hz. The minimum value is 10ms,
+        /// or 100hz. Note that setting this value too aggressively can flood the communication channel and cause
+        /// messages to be dropped.
+        void setMediumPriorityTimer(uint16_t ms) { ms = MAX(10, ms); msg.set_mediumprioritytimerms(ms); }
+
+        /// @brief Set the timer for the low priority message loop on the hand. This loop is responsible
+        /// for reporting full servo status messages (temperature, voltage, etc). The default value is 
+        /// 500, or 2hz. The minimum value is 10ms, or 100 hz. Note that setting this value too aggressively
+        /// can flood the communication channel and cause messages to be dropped.
+        void setLowPriorityTimer(uint16_t ms) { ms = MAX(10, ms); msg.set_lowprioritytimerms(ms); }
+        
     private:
         dexhand::HandParams msg;
 };

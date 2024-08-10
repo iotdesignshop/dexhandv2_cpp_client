@@ -26,10 +26,10 @@ class ServoManager {
 
         /// @brief Initializes the ServoManager
         /// @param connect Reference to a DexhandConnect object
-        /// @param rxFrequency Frequency to receive servo status messages (Hz)
+        /// @param rxFrequency Frequency to poll received servo status messages (Hz)
         /// @param txFrequency Frequency to send servo position updates (Hz)
         /// @return true if initialization was successful, false otherwise
-        bool start(unsigned int rxFrequency = 100, unsigned int txFrequency = 20);
+        bool start(unsigned int rxFrequency = 20, unsigned int txFrequency = 20);
 
         /// @brief Checks if the ServoManager is ready to use
         /// @return true if the ServoManager is ready, false otherwise
